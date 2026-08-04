@@ -1,0 +1,240 @@
+{
+  "nodes": [
+    {
+      "id": "c1",
+      "text": "Standing desks reduce back pain for office workers"
+    },
+    {
+      "id": "c2",
+      "text": "Prolonged sitting worsens back pain"
+    },
+    {
+      "id": "c3",
+      "text": "Alternating sitting and standing reduces spinal load"
+    },
+    {
+      "id": "c4",
+      "text": "Standing all day causes its own pain"
+    }
+  ],
+  "edges": [
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c2"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c3"
+    },
+    {
+      "kind": "attack",
+      "src": "c1",
+      "dst": "c4"
+    },
+    {
+      "kind": "ground",
+      "claim": "c2",
+      "source": "s1",
+      "locator": "p.4, pooled effect",
+      "quote": "pooled results favored sit-stand interventions"
+    },
+    {
+      "kind": "ground",
+      "claim": "c3",
+      "source": "s2",
+      "locator": "section 2, load table"
+    },
+    {
+      "kind": "ground",
+      "claim": "c4",
+      "source": "s3",
+      "locator": "para 3"
+    }
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "ref": "Agarwal 2018 systematic review",
+      "url": "https://example.org/agarwal2018",
+      "bears_on": "standing desks back pain sitting office"
+    },
+    {
+      "id": "s2",
+      "ref": "NIOSH posture guidance page",
+      "bears_on": "alternating posture standing spinal load"
+    },
+    {
+      "id": "s3",
+      "ref": "ergonomics field report 2015",
+      "bears_on": "standing all day pain feet"
+    }
+  ],
+  "grades": [
+    {
+      "source": "s1",
+      "grade": "LIVE"
+    },
+    {
+      "source": "s2",
+      "grade": "LIVE"
+    },
+    {
+      "source": "s3",
+      "grade": "LIVE"
+    }
+  ],
+  "holes": [],
+  "linchpin": [
+    "c3"
+  ],
+  "leaves": [
+    "c2",
+    "c3",
+    "c4"
+  ],
+  "specs": [
+    {
+      "id": "p1",
+      "claims": [
+        "c1",
+        "c2"
+      ],
+      "register": "argument",
+      "label": "main line",
+      "target": 29
+    },
+    {
+      "id": "p2",
+      "claims": [
+        "c4"
+      ],
+      "register": "argument",
+      "label": "objection",
+      "target": 17
+    },
+    {
+      "id": "p3",
+      "claims": [
+        "c3"
+      ],
+      "register": "argument",
+      "label": "linchpin",
+      "target": 17
+    }
+  ],
+  "bindings": [
+    {
+      "spec": "p1",
+      "address": "blk1"
+    },
+    {
+      "spec": "p2",
+      "address": "blk2"
+    },
+    {
+      "spec": "p3",
+      "address": "blk3"
+    }
+  ],
+  "prose": [
+    {
+      "address": "blk1",
+      "kind": "placeholder",
+      "text": "[[passage: p1 | Standing desks reduce back pain for office workers / Prolonged sitting worsens back pain | ~29w]]"
+    },
+    {
+      "address": "blk2",
+      "kind": "placeholder",
+      "text": "[[passage: p2 | Standing all day causes its own pain | ~17w]]"
+    },
+    {
+      "address": "blk3",
+      "kind": "placeholder",
+      "text": "[[passage: p3 | Alternating sitting and standing reduces spinal load | ~17w]]"
+    },
+    {
+      "address": "blk1",
+      "kind": "fill",
+      "text": "Office workers who switch to standing desks report reduced back pain. Prolonged sitting worsens back pain, and the reviewed evidence points the same way."
+    },
+    {
+      "address": "blk2",
+      "kind": "fill",
+      "text": "Critics note that standing all day causes its own pain, especially in the feet and knees."
+    },
+    {
+      "address": "blk3",
+      "kind": "fill",
+      "text": "Alternating sitting and standing reduces spinal load across the workday, which is the linchpin of the case."
+    }
+  ],
+  "trail": [
+    {
+      "event": "intake",
+      "claim": "c1"
+    },
+    {
+      "event": "materialize",
+      "spec": "p1",
+      "address": "blk1"
+    },
+    {
+      "event": "materialize",
+      "spec": "p2",
+      "address": "blk2"
+    },
+    {
+      "event": "materialize",
+      "spec": "p3",
+      "address": "blk3"
+    },
+    {
+      "event": "fill",
+      "spec": "p1",
+      "words": 24
+    },
+    {
+      "event": "spec_done",
+      "spec": "p1",
+      "checks": 3,
+      "extracted": 2
+    },
+    {
+      "event": "fill",
+      "spec": "p2",
+      "words": 16
+    },
+    {
+      "event": "spec_done",
+      "spec": "p2",
+      "checks": 3,
+      "extracted": 1
+    },
+    {
+      "event": "fill",
+      "spec": "p3",
+      "words": 17
+    },
+    {
+      "event": "spec_done",
+      "spec": "p3",
+      "checks": 3,
+      "extracted": 1
+    }
+  ],
+  "done": [
+    "p1",
+    "p2",
+    "p3"
+  ],
+  "constraints": {
+    "voice": "plain declarative"
+  },
+  "meta": {
+    "slug": "standing-desks",
+    "date": "2026-08-04",
+    "title": "Standing desks and back pain"
+  }
+}
