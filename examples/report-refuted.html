@@ -1,0 +1,152 @@
+<!-- claimground report v0.0.1 -->
+<!doctype html><html lang='en'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>claimground: Standing desks and back pain</title>
+<style>
+:root { --ink:#26211c; --paper:#faf8f3; --card:#ffffff; --line:#d8cdb8;
+  --muted:#7a6b5d; --accent:#e07b3c; --ok:#0d9488; --bad:#c2410c;
+  --mid:#d97706; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e8e2d6; --paper:#191613; --card:#211d19; --line:#3c352c;
+    --muted:#a2937f; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+header.top { position:sticky; top:0; display:flex; align-items:center;
+  gap:12px; padding:10px 20px; background:var(--paper);
+  border-bottom:2px solid var(--line); z-index:5; }
+.brand { font-family:var(--mono); font-weight:700; letter-spacing:.12em;
+  font-size:13px; }
+.chip { font-family:var(--mono); font-size:12px; font-weight:700;
+  padding:3px 10px; border-radius:999px; color:#fff; }
+.chip.SUPPORTED { background:var(--ok); }
+.chip.REFUTED { background:var(--bad); }
+.chip.UNDECIDED { background:var(--mid); }
+#copybtn { margin-left:auto; font:600 13px system-ui; padding:6px 14px;
+  border:2px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+#copybtn:hover { border-color:var(--accent); color:var(--accent); }
+main { max-width:76ch; margin:0 auto; padding:28px 20px 80px; }
+h1 { font-size:26px; line-height:1.3; margin:8px 0 4px; }
+h2 { font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); border-bottom:1px solid var(--line);
+  padding-bottom:4px; margin:36px 0 14px; }
+h3 { font-size:14px; font-family:var(--mono); margin:18px 0 6px; }
+.meta { color:var(--muted); font-size:13px; font-family:var(--mono); }
+.verdict-line { font-size:18px; font-weight:600; }
+article.passage { background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:4px 16px 10px; margin:12px 0; }
+article.passage.objection { border-left-color:var(--mid); }
+article.passage.linchpin { border-left-color:var(--ok); }
+ul.tree { list-style:none; padding-left:0; }
+ul.tree ul { list-style:none; padding-left:22px;
+  border-left:1px solid var(--line); margin:4px 0 4px 6px; }
+ul.tree li { margin:7px 0; }
+.cid { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.badge { font-family:var(--mono); font-size:11px; padding:1px 7px;
+  border-radius:4px; border:1px solid var(--line); margin-left:6px;
+  white-space:nowrap; }
+.badge.live { color:var(--ok); border-color:var(--ok); }
+.badge.dead { color:var(--muted); }
+.badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
+.badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
+.badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+  vertical-align:top; }
+th { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); }
+td.mono, .mono { font-family:var(--mono); font-size:12.5px; }
+blockquote { margin:6px 0 0; padding:2px 12px; border-left:3px solid var(--line);
+  color:var(--muted); font-size:13.5px; font-style:italic; }
+details { margin:28px 0; }
+summary { cursor:pointer; font-weight:600; }
+pre.trail { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:12px; font:12px/1.7 var(--mono);
+  overflow-x:auto; }
+.ledger { background:var(--card); border:2px solid var(--bad);
+  border-radius:6px; padding:10px 16px; margin:14px 0; }
+footer { margin-top:48px; color:var(--muted); font-size:12.5px;
+  border-top:1px solid var(--line); padding-top:12px; }
+#copytext { position:absolute; left:-9999px; top:0; }
+a { color:var(--accent); }
+@media print { header.top button { display:none; } }
+</style></head><body>
+<header class='top'><div class='brand'>CLAIMGROUND</div>
+<div class='chip REFUTED'>REFUTED(c3: source contradicts)</div>
+<button id='copybtn'>copy page as text</button></header>
+<main>
+<section><p class='meta'>hypothesis</p><h1>Standing desks reduce back pain for office workers</h1>
+<p class='meta'>2026-08-04 · 4 claims · 3 sources · 8 trail events</p></section>
+<section><h2>Verdict</h2><p class='verdict-line'>REFUTED(c3: source contradicts)</p><p>The graph broke before any prose was written. Refutation here costs research, never a manuscript.</p><div class="ledger"><strong>Dead claim:</strong> <span class="cid">c3</span> Alternating sitting and standing reduces spinal load<br><strong>Cause:</strong> source contradicts<br>source s2 says otherwise: &quot;no consistent reduction in spinal load was observed&quot;</div></section>
+<section><h2>The work</h2><p>No prose. The run ended in phase 1, before composition.</p></section>
+<section><h2>The argument</h2><ul class='tree'><li><span class="cid">c1</span> Standing desks reduce back pain for office workers<ul><li><span class="cid">c2</span> Prolonged sitting worsens back pain<span class="badge live">s1 @ p.4, pooled effect: LIVE</span></li><li><span class="cid">c3</span> Alternating sitting and standing reduces spinal load<span class="badge linch">LINCHPIN</span><span class="badge so">s2 @ section 2, load table: SAYS_OTHERWISE</span><span class="badge so">s2 says otherwise</span></li><li><span class="cid">c4</span> Standing all day causes its own pain<span class="badge attack">ATTACK</span><span class="badge live">s3 @ para 3: LIVE</span></li></ul></li></ul></section>
+<section><h2>Objections</h2><ul class='tree'><li><span class='cid'>c4</span> Standing all day causes its own pain <span class='badge so'>STANDS, unanswered</span> (against c1)</li></ul></section>
+<section><h2>Sources</h2><table><tr><th>id</th><th>source</th><th>grade</th><th>attached to</th></tr><tr><td class='mono'>s1</td><td><a href="https://example.org/agarwal2018">Agarwal 2018 systematic review</a></td><td><span class='badge live'>LIVE</span></td><td>c2 @ p.4, pooled effect <blockquote>"pooled results favored sit-stand interventions"</blockquote></td></tr><tr><td class='mono'>s2</td><td>NIOSH posture guidance page</td><td><span class='badge so'>SAYS_OTHERWISE</span></td><td>c3 @ section 2, load table</td></tr><tr><td class='mono'>s3</td><td>ergonomics field report 2015</td><td><span class='badge live'>LIVE</span></td><td>c4 @ para 3</td></tr></table></section>
+<details><summary>Trail (8 events)</summary><pre class='trail'>event=intake  claim=c1
+event=materialize  spec=p1  address=blk1
+event=materialize  spec=p2  address=blk2
+event=materialize  spec=p3  address=blk3
+event=fill  spec=p1  words=24
+event=fill  spec=p2  words=16
+event=fill  spec=p3  words=17
+event=verdict  verdict=REFUTED  claim=c3  cause=source contradicts</pre></details>
+<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.1.</footer>
+</main>
+<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.1)
+Hypothesis: Standing desks reduce back pain for office workers
+Verdict: REFUTED(c3: source contradicts)
+Date: 2026-08-04
+
+== VERDICT ==
+The graph broke before any prose was written. Refutation here costs research, never a manuscript.
+DEAD CLAIM: c3 Alternating sitting and standing reduces spinal load
+CAUSE: source contradicts
+source s2 says otherwise: &quot;no consistent reduction in spinal load was observed&quot;
+
+== THE WORK ==
+No prose. The run ended in phase 1, before composition.
+
+== THE ARGUMENT ==
+- c1 Standing desks reduce back pain for office workers
+  - c2 Prolonged sitting worsens back pain  [s1 @ p.4, pooled effect: LIVE]
+  - c3 Alternating sitting and standing reduces spinal load  [LINCHPIN; s2 @ section 2, load table: SAYS_OTHERWISE]
+  - c4 Standing all day causes its own pain  [ATTACK; s3 @ para 3: LIVE]
+
+== OBJECTIONS ==
+- c4 Standing all day causes its own pain [STANDS, unanswered] (against c1)
+
+== SOURCES ==
+s1. Agarwal 2018 systematic review &lt;https://example.org/agarwal2018&gt; [LIVE]
+    c2 @ p.4, pooled effect :: &quot;pooled results favored sit-stand interventions&quot;
+s2. NIOSH posture guidance page [SAYS_OTHERWISE]
+    c3 @ section 2, load table
+s3. ergonomics field report 2015 [LIVE]
+    c4 @ para 3
+
+== TRAIL ==
+event=intake  claim=c1
+event=materialize  spec=p1  address=blk1
+event=materialize  spec=p2  address=blk2
+event=materialize  spec=p3  address=blk3
+event=fill  spec=p1  words=24
+event=fill  spec=p2  words=16
+event=fill  spec=p3  words=17
+event=verdict  verdict=REFUTED  claim=c3  cause=source contradicts
+
+Method: claim graph first, prose second. Every claim above traces to a source at a named locator or is flagged as a hole. github.com/ctavolazzi/claimground</textarea>
+<script>
+document.getElementById('copybtn').addEventListener('click', async () => {
+  const btn = document.getElementById('copybtn');
+  const txt = document.getElementById('copytext').value;
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) {
+    const ta = document.getElementById('copytext');
+    ta.select(); document.execCommand('copy');
+  }
+  btn.textContent = 'copied';
+  setTimeout(() => { btn.textContent = 'copy page as text'; }, 1500);
+});
+</script>
+</body></html>

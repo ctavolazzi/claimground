@@ -15,7 +15,7 @@ state with a documented cause of death.
 
 ## The two phases
 
-```
+```text
 PHASE 1: GRAPH                          PHASE 2: COMPOSE
 intake -> decompose -> ground           plan -> fill -> check
    |         |           |                |      |       |
@@ -31,6 +31,32 @@ with            try_close: CLOSED | OPEN | BROKEN
 
 Verdicts: `SUPPORTED | REFUTED(cause) | UNDECIDED`. The verdict is settled
 by the graph, never by the prose.
+
+## What a run looks like
+
+Both reports below come from the same worked example (the standing-desk
+hypothesis in `examples/`). The only difference between them is one grade:
+in the second run, fetching the NIOSH source revealed it says the opposite
+of the linchpin claim, so the graph broke and the run ended before any
+prose existed.
+
+**SUPPORTED** ([live page](https://raw.githack.com/ctavolazzi/claimground/main/examples/report.html) ·
+[examples/report.html](examples/report.html), built from
+[examples/state.json](examples/state.json)). The graph closed: prose was
+written, checked back against the graph, and shipped with its objection
+passage. The top-right button copies the entire report as clean plain text.
+
+![SUPPORTED report: verdict chip, prose passages, argument tree with grounding badges, objections, sources with quotes](examples/report-supported.png)
+
+**REFUTED** ([live page](https://raw.githack.com/ctavolazzi/claimground/main/examples/report-refuted.html) ·
+[examples/report-refuted.html](examples/report-refuted.html), built from
+[examples/state-refuted.json](examples/state-refuted.json)). One source
+graded SAYS_OTHERWISE against the linchpin. Note the dead-claim ledger
+with the contradicting quote, the SAYS_OTHERWISE badges in the tree and
+sources table, and the objection now standing unanswered. No prose was
+ever written; the report itself is the deliverable.
+
+![REFUTED report: dead-claim ledger with cause and contradicting quote, SAYS_OTHERWISE grading, objection standing](examples/report-refuted.png)
 
 ## Files
 
@@ -48,7 +74,7 @@ by the graph, never by the prose.
 
 ## CLI
 
-```
+```bash
 python3 claimground_lib.py validate  state.json
 python3 claimground_lib.py close     state.json [--record]
 python3 claimground_lib.py plan      state.json [--apply]
