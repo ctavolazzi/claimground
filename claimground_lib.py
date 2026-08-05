@@ -49,7 +49,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -407,13 +407,18 @@ _CSS = """
   :root { --ink:#e8e2d6; --paper:#191613; --card:#211d19; --line:#3c352c;
     --muted:#a2937f; } }
 * { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 body { margin:0; background:var(--paper); color:var(--ink);
   font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
 header.top { position:sticky; top:0; display:flex; align-items:center;
-  gap:12px; padding:10px 20px; background:var(--paper);
+  flex-wrap:wrap; gap:8px 12px; padding:10px 20px; background:var(--paper);
   border-bottom:2px solid var(--line); z-index:5; }
 .brand { font-family:var(--mono); font-weight:700; letter-spacing:.12em;
   font-size:13px; }
+nav.toc { display:flex; gap:12px; flex-wrap:wrap; font:600 11px var(--mono); }
+nav.toc a { color:var(--muted); text-decoration:none;
+  text-transform:uppercase; letter-spacing:.06em; }
+nav.toc a:hover { color:var(--accent); }
 .chip { font-family:var(--mono); font-size:12px; font-weight:700;
   padding:3px 10px; border-radius:999px; color:#fff; }
 .chip.SUPPORTED { background:var(--ok); }
@@ -430,20 +435,35 @@ h2 { font-size:15px; letter-spacing:.1em; text-transform:uppercase;
   padding-bottom:4px; margin:36px 0 14px; }
 h3 { font-size:14px; font-family:var(--mono); margin:18px 0 6px; }
 .meta { color:var(--muted); font-size:13px; font-family:var(--mono); }
+.stats { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 0; }
+.stat { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:6px 12px; min-width:88px; }
+.stat b { display:block; font:700 15px var(--mono); }
+.stat span { font:10.5px var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.05em; }
 .verdict-line { font-size:18px; font-weight:600; }
-article.passage { background:var(--card); border:1px solid var(--line);
+article.passage { position:relative; background:var(--card);
+  border:1px solid var(--line);
   border-left:4px solid var(--accent); border-radius:6px;
   padding:4px 16px 10px; margin:12px 0; }
+.pcopy { position:absolute; top:10px; right:12px; font:600 11px var(--mono);
+  padding:3px 9px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:5px; cursor:pointer; }
+.pcopy:hover { color:var(--accent); border-color:var(--accent); }
 article.passage.objection { border-left-color:var(--mid); }
 article.passage.linchpin { border-left-color:var(--ok); }
 ul.tree { list-style:none; padding-left:0; }
 ul.tree ul { list-style:none; padding-left:22px;
   border-left:1px solid var(--line); margin:4px 0 4px 6px; }
-ul.tree li { margin:7px 0; }
+ul.tree li { margin:9px 0; }
+.claim-line { border-radius:4px; }
+.badge-row { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 0 2px; }
 .cid { font-family:var(--mono); font-size:12px; color:var(--muted); }
 .badge { font-family:var(--mono); font-size:11px; padding:1px 7px;
-  border-radius:4px; border:1px solid var(--line); margin-left:6px;
+  border-radius:4px; border:1px solid var(--line);
   white-space:nowrap; }
+a.badge { text-decoration:none; }
+.badge-row .badge { margin-left:0; }
 .badge.live { color:var(--ok); border-color:var(--ok); }
 .badge.dead { color:var(--muted); }
 .badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
@@ -451,7 +471,13 @@ ul.tree li { margin:7px 0; }
 .receipts { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
   font:11.5px/1.7 var(--mono); color:var(--muted); }
 .receipts b { color:var(--ink); font-weight:600; }
+.receipts a { color:inherit; text-decoration:none;
+  border-bottom:1px dotted var(--muted); }
+.receipts a:hover { color:var(--accent); border-color:var(--accent); }
 .gdate { font:11px var(--mono); color:var(--muted); display:block; }
+tr:target td { background:rgba(224,123,60,.14); }
+li:target > .claim-line { background:rgba(224,123,60,.14); }
+:target { scroll-margin-top:80px; }
 .badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
 .badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
@@ -464,30 +490,40 @@ blockquote { margin:6px 0 0; padding:2px 12px; border-left:3px solid var(--line)
   color:var(--muted); font-size:13.5px; font-style:italic; }
 details { margin:28px 0; }
 summary { cursor:pointer; font-weight:600; }
-pre.trail { background:var(--card); border:1px solid var(--line);
-  border-radius:6px; padding:12px; font:12px/1.7 var(--mono);
-  overflow-x:auto; }
+.trailbox { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:10px 14px; font:12px/1.9 var(--mono);
+  overflow-x:auto; margin-top:10px; }
+.tline { white-space:nowrap; }
+.tev { display:inline-block; min-width:104px; color:var(--accent);
+  font-weight:700; }
 .ledger { background:var(--card); border:2px solid var(--bad);
   border-radius:6px; padding:10px 16px; margin:14px 0; }
 footer { margin-top:48px; color:var(--muted); font-size:12.5px;
   border-top:1px solid var(--line); padding-top:12px; }
-#copytext { position:absolute; left:-9999px; top:0; }
+#copytext, .ptext { position:absolute; left:-9999px; top:0; }
 a { color:var(--accent); }
-@media print { header.top button { display:none; } }
+@media print {
+  header.top { position:static; }
+  #copybtn, .pcopy, nav.toc { display:none; }
+  :root { --ink:#1a1613; --paper:#fff; --card:#fff; --line:#bbb;
+    --muted:#555; }
+  article.passage, .trailbox, .stat, .ledger { break-inside:avoid; }
+}
 """
 
 _JS = """
-document.getElementById('copybtn').addEventListener('click', async () => {
-  const btn = document.getElementById('copybtn');
-  const txt = document.getElementById('copytext').value;
-  try { await navigator.clipboard.writeText(txt); }
-  catch (e) {
-    const ta = document.getElementById('copytext');
-    ta.select(); document.execCommand('copy');
-  }
+async function copyText(ta, btn, label) {
+  try { await navigator.clipboard.writeText(ta.value); }
+  catch (e) { ta.select(); document.execCommand('copy'); }
   btn.textContent = 'copied';
-  setTimeout(() => { btn.textContent = 'copy page as text'; }, 1500);
-});
+  setTimeout(() => { btn.textContent = label; }, 1400);
+}
+document.getElementById('copybtn').addEventListener('click', () =>
+  copyText(document.getElementById('copytext'),
+           document.getElementById('copybtn'), 'copy page as text'));
+document.querySelectorAll('.pcopy').forEach(btn =>
+  btn.addEventListener('click', () =>
+    copyText(document.getElementById(btn.dataset.target), btn, 'copy')));
 """
 
 
@@ -500,23 +536,30 @@ _BADGE_CLS = {"LIVE": "live", "DEAD": "dead", "SAYS_OTHERWISE": "so",
 
 
 def _grade_badges(state, cid):
+    # each grounding badge links to its source row; quote rides as a tooltip
     out = []
     for e in ground_edges(state, cid):
         g = latest_grade(state, e["source"]) or "ungraded"
         cls = _BADGE_CLS.get(g, "dead")
-        out.append('<span class="badge %s">%s @ %s: %s</span>'
-                   % (cls, _esc(e["source"]), _esc(e["locator"]), _esc(g)))
+        tip = (' title="%s"' % _esc(e["quote"])) if e.get("quote") else ""
+        out.append('<a class="badge %s" href="#src-%s"%s>%s @ %s: %s</a>'
+                   % (cls, _esc(e["source"]), tip, _esc(e["source"]),
+                      _esc(e["locator"]), _esc(g)))
     for h in state["holes"]:
         if h["claim"] == cid:
             why = h["why"] if len(h["why"]) <= 60 else h["why"][:57] + "..."
-            out.append('<span class="badge hole">HOLE: %s</span>' % _esc(why))
+            out.append('<span class="badge hole" title="%s">HOLE: %s</span>'
+                       % (_esc(h["why"]), _esc(why)))
     src = _contradicted(state, cid)
     if src:
-        out.append('<span class="badge so">%s says otherwise</span>' % _esc(src))
+        out.append('<a class="badge so" href="#src-%s">%s says otherwise</a>'
+                   % (_esc(src), _esc(src)))
     return "".join(out)
 
 
 def _tree_html(state, cid, is_attack=False):
+    # claim text on one line, badges on their own row beneath: scannable,
+    # and long badge sets can no longer break mid-sentence
     lp = state["linchpin"][-1] if state["linchpin"] else None
     badges = ""
     if is_attack:
@@ -527,8 +570,10 @@ def _tree_html(state, cid, is_attack=False):
     kids = "".join(_tree_html(state, k) for k in need_children(state, cid))
     kids += "".join(_tree_html(state, a, True) for a in attackers_of(state, cid))
     sub = "<ul>%s</ul>" % kids if kids else ""
-    return ('<li><span class="cid">%s</span> %s%s%s</li>'
-            % (_esc(cid), _esc(node(state, cid)["text"]), badges, sub))
+    brow = ('<div class="badge-row">%s</div>' % badges) if badges else ""
+    return ('<li id="claim-%s"><div class="claim-line">'
+            '<span class="cid">%s</span> %s</div>%s%s</li>'
+            % (_esc(cid), _esc(cid), _esc(node(state, cid)["text"]), brow, sub))
 
 
 def _tree_text(state, cid, indent=0, is_attack=False):
@@ -563,8 +608,34 @@ def render(state, out_path):
     stamp = meta.get("date") or date.today().isoformat()
     title = meta.get("title") or root["text"]
 
+    # --- stats strip ---
+    leaves_all = [n["id"] for n in state["nodes"]
+                  if not need_children(state, n["id"])]
+    live_leaves = [c for c in leaves_all if _live_grounded(state, c)]
+    gcounts = {}
+    for s in state["sources"]:
+        g = latest_grade(state, s["id"]) or "ungraded"
+        gcounts[g] = gcounts.get(g, 0) + 1
+    att_edges = [e for e in state["edges"] if e["kind"] == "attack"]
+    obj_answered = sum(1 for e in att_edges
+                       if fully_grounded(state, e["dst"])
+                       and fully_grounded(state, e["src"]))
+    lp = state["linchpin"][-1] if state["linchpin"] else None
+    lp_status = ("held" if lp and _live_grounded(state, lp)
+                 else "bare" if lp else "unset")
+    stats = [("%d/%d" % (len(live_leaves), len(leaves_all)), "leaves live"),
+             (str(len(state["holes"])), "holes"),
+             (" ".join("%d %s" % (n, g) for g, n in sorted(gcounts.items())),
+              "sources"),
+             ("%d/%d" % (obj_answered, len(att_edges)), "objections answered"),
+             (lp_status, "linchpin")]
+    stats_html = '<div class="stats">%s</div>' % "".join(
+        "<div class='stat'><b>%s</b><span>%s</span></div>" % (_esc(v), _esc(l))
+        for v, l in stats)
+    stats_txt = "; ".join("%s %s" % (v, l) for v, l in stats)
+
     # --- passages ---
-    passages_html, passages_txt = [], []
+    passages_html, passages_txt, ptas = [], [], []
     for b in state["bindings"]:
         sp = next(s for s in state["specs"] if s["id"] == b["spec"])
         text = latest_prose(state, b["address"]) or ""
@@ -578,25 +649,33 @@ def render(state, out_path):
             for e in ground_edges(state, cid):
                 grec = latest_grade_rec(state, e["source"])
                 stampd = (" " + grec["date"]) if grec.get("date") else ""
-                rec_html.append("<b>%s</b> &larr; %s @ %s [%s%s]"
-                                % (_esc(cid), _esc(e["source"]),
-                                   _esc(e["locator"]),
+                rec_html.append("<b><a href='#claim-%s'>%s</a></b> &larr; "
+                                "<a href='#src-%s'>%s</a> @ %s [%s%s]"
+                                % (_esc(cid), _esc(cid), _esc(e["source"]),
+                                   _esc(e["source"]), _esc(e["locator"]),
                                    _esc(grec.get("grade", "ungraded")), stampd))
                 rec_txt.append("  %s <- %s @ %s [%s%s]"
                                % (cid, e["source"], e["locator"],
                                   grec.get("grade", "ungraded"), stampd))
             for h in state["holes"]:
                 if h["claim"] == cid:
-                    rec_html.append("<b>%s</b> &larr; HOLE: %s"
-                                    % (_esc(cid), _esc(h["why"])))
+                    rec_html.append("<b><a href='#claim-%s'>%s</a></b> "
+                                    "&larr; HOLE: %s"
+                                    % (_esc(cid), _esc(cid), _esc(h["why"])))
                     rec_txt.append("  %s <- HOLE: %s" % (cid, h["why"]))
         receipts = ('<div class="receipts">%s</div>' % "<br>".join(rec_html)
                     if rec_html else "")
+        head = "%s · %s · %s" % (sp["id"], sp["label"], status)
+        pta_id = "pt-%s" % sp["id"]
+        ptas.append((pta_id, "\n".join(["[%s]" % head, text]
+                                       + (["receipts:"] + rec_txt
+                                          if rec_txt else []))))
         passages_html.append(
-            '<article class="passage %s"><h3>%s · %s · %s</h3>%s%s</article>'
-            % (cls, _esc(sp["id"]), _esc(sp["label"]), status, paras, receipts))
-        passages_txt += ["[%s · %s · %s]" % (sp["id"], sp["label"], status),
-                         text]
+            '<article class="passage %s" id="passage-%s">'
+            '<button class="pcopy" data-target="%s">copy</button>'
+            '<h3>%s</h3>%s%s</article>'
+            % (cls, _esc(sp["id"]), pta_id, _esc(head), paras, receipts))
+        passages_txt += ["[%s]" % head, text]
         if rec_txt:
             passages_txt += ["receipts:"] + rec_txt
         passages_txt.append("")
@@ -615,11 +694,13 @@ def render(state, out_path):
         fg_t = fully_grounded(state, target)
         status = ("STANDS, unanswered" if fg_a and not fg_t else
                   "grounded and answered" if fg_a else "not yet grounded")
-        obj_html.append("<li><span class='cid'>%s</span> %s <span class='badge %s'>%s</span> "
-                        "(against %s)</li>"
-                        % (_esc(attacker), _esc(node(state, attacker)["text"]),
+        obj_html.append("<li><a class='cid' href='#claim-%s'>%s</a> %s "
+                        "<span class='badge %s'>%s</span> "
+                        "(against <a href='#claim-%s'>%s</a>)</li>"
+                        % (_esc(attacker), _esc(attacker),
+                           _esc(node(state, attacker)["text"]),
                            "so" if "STANDS" in status else "live", _esc(status),
-                           _esc(target)))
+                           _esc(target), _esc(target)))
         obj_txt.append("- %s %s [%s] (against %s)"
                        % (attacker, node(state, attacker)["text"], status, target))
     if not obj_html:
@@ -638,8 +719,9 @@ def render(state, out_path):
             if e.get("kind") == "ground" and e.get("source") == s["id"]:
                 q = (' <blockquote>"%s"</blockquote>' % _esc(e["quote"])
                      if e.get("quote") else "")
-                atts_html.append("%s @ %s%s" % (_esc(e["claim"]),
-                                                _esc(e["locator"]), q))
+                atts_html.append("<a href='#claim-%s'>%s</a> @ %s%s"
+                                 % (_esc(e["claim"]), _esc(e["claim"]),
+                                    _esc(e["locator"]), q))
                 atts_txt.append("%s @ %s%s"
                                 % (e["claim"], e["locator"],
                                    (' :: "%s"' % e["quote"]) if e.get("quote") else ""))
@@ -650,9 +732,9 @@ def render(state, out_path):
             gcell += "<span class='gdate'>graded %s</span>" % _esc(grec["date"])
         if grec.get("note"):
             gcell += "<span class='gdate'>%s</span>" % _esc(grec["note"])
-        src_rows.append("<tr><td class='mono'>%s</td><td>%s</td>"
+        src_rows.append("<tr id='src-%s'><td class='mono'>%s</td><td>%s</td>"
                         "<td>%s</td><td>%s</td></tr>"
-                        % (_esc(s["id"]), ref, gcell,
+                        % (_esc(s["id"]), _esc(s["id"]), ref, gcell,
                            "<br>".join(atts_html) or "not attached"))
         gtxt = g + ((", graded " + grec["date"]) if grec.get("date") else "")
         if grec.get("note"):
@@ -675,8 +757,10 @@ def render(state, out_path):
             if h["claim"] == cid:
                 detail.append("declared hole: %s" % h["why"])
         ledger_html = ('<div class="ledger"><strong>Dead claim:</strong> '
-                       '<span class="cid">%s</span> %s<br><strong>Cause:</strong> %s'
-                       % (_esc(cid), _esc(node(state, cid)["text"]), _esc(cause)))
+                       '<a class="cid" href="#claim-%s">%s</a> %s'
+                       '<br><strong>Cause:</strong> %s'
+                       % (_esc(cid), _esc(cid),
+                          _esc(node(state, cid)["text"]), _esc(cause)))
         ledger_html += "".join("<br>%s" % _esc(d) for d in detail) + "</div>"
         ledger_txt = ("DEAD CLAIM: %s %s\nCAUSE: %s\n%s"
                       % (cid, node(state, cid)["text"], cause, "\n".join(detail)))
@@ -684,6 +768,12 @@ def render(state, out_path):
     # --- trail ---
     trail_lines = ["  ".join("%s=%s" % kv for kv in t.items())
                    for t in state["trail"]]
+    trail_html = "".join(
+        "<div class='tline'><span class='tev'>%s</span>%s</div>"
+        % (_esc(t.get("event", "?")),
+           _esc("  ".join("%s=%s" % kv for kv in t.items()
+                          if kv[0] != "event")))
+        for t in state["trail"])
 
     # --- verdict sentence ---
     vmap = {"SUPPORTED": "The graph closed: every claim is grounded in a live "
@@ -706,7 +796,8 @@ def render(state, out_path):
         "CLAIMGROUND REPORT  (claimground v%s)" % VERSION,
         "Hypothesis: %s" % root["text"],
         "Verdict: %s" % v,
-        "Date: %s" % stamp, "",
+        "Date: %s" % stamp,
+        "Status: %s" % stats_txt, "",
         "== VERDICT ==", vsent] +
         ([ledger_txt, ""] if ledger_txt else [""]) + [
         "== THE WORK =="] + passages_txt + [
@@ -726,26 +817,38 @@ def render(state, out_path):
         "<style>%s</style></head><body>" % _CSS,
         "<header class='top'><div class='brand'>CLAIMGROUND</div>",
         "<div class='chip %s'>%s</div>" % (vclass, _esc(v)),
+        "<nav class='toc'><a href='#sec-verdict'>verdict</a>"
+        "<a href='#sec-work'>work</a><a href='#sec-argument'>argument</a>"
+        "<a href='#sec-objections'>objections</a>"
+        "<a href='#sec-sources'>sources</a><a href='#sec-trail'>trail</a></nav>",
         "<button id='copybtn'>copy page as text</button></header>",
         "<main>",
         "<section><p class='meta'>hypothesis</p><h1>%s</h1>" % _esc(root["text"]),
-        "<p class='meta'>%s · %d claims · %d sources · %d trail events</p></section>"
+        "<p class='meta'>%s · %d claims · %d sources · %d trail events</p>"
         % (stamp, len(state["nodes"]), len(state["sources"]), len(state["trail"])),
-        "<section><h2>Verdict</h2><p class='verdict-line'>%s</p><p>%s</p>%s</section>"
+        stats_html, "</section>",
+        "<section id='sec-verdict'><h2>Verdict</h2>"
+        "<p class='verdict-line'>%s</p><p>%s</p>%s</section>"
         % (_esc(v), _esc(vsent), ledger_html),
-        "<section><h2>The work</h2>%s</section>" % "".join(passages_html),
-        "<section><h2>The argument</h2>%s</section>" % tree_html,
-        "<section><h2>Objections</h2><ul class='tree'>%s</ul></section>" % "".join(obj_html),
-        "<section><h2>Sources</h2><table><tr><th>id</th><th>source</th>"
-        "<th>grade</th><th>attached to</th></tr>%s</table></section>" % "".join(src_rows),
-        "<details><summary>Trail (%d events)</summary><pre class='trail'>%s</pre></details>"
-        % (len(trail_lines), _esc("\n".join(trail_lines))),
+        "<section id='sec-work'><h2>The work</h2>%s</section>"
+        % "".join(passages_html),
+        "<section id='sec-argument'><h2>The argument</h2>%s</section>" % tree_html,
+        "<section id='sec-objections'><h2>Objections</h2><ul class='tree'>%s</ul>"
+        "</section>" % "".join(obj_html),
+        "<section id='sec-sources'><h2>Sources</h2><table><tr><th>id</th>"
+        "<th>source</th><th>grade</th><th>attached to</th></tr>%s</table>"
+        "</section>" % "".join(src_rows),
+        "<details id='sec-trail'><summary>Trail (%d events)</summary>"
+        "<div class='trailbox'>%s</div></details>"
+        % (len(trail_lines), trail_html),
         "<footer>claim graph first, prose second. The verdict was settled by "
         "the graph before any prose existed; the prose answers to it. "
         "Generated by <a href='https://github.com/ctavolazzi/claimground'>"
         "claimground</a> v%s.</footer>" % VERSION,
         "</main>",
         "<textarea id='copytext' readonly>%s</textarea>" % _esc(txt),
+        "".join("<textarea class='ptext' id='%s' readonly>%s</textarea>"
+                % (_esc(pid), _esc(pt)) for pid, pt in ptas),
         "<script>%s</script>" % _JS,
         "</body></html>"])
 
