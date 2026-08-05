@@ -40,10 +40,20 @@ No speculative features.
    pages may not contain their rendered text server-side; a headless-DOM
    dump fallback would close that gap. WebFetch reading digests are not
    themselves archived.
-9. **Map threshold and word bands on real prose: untested.** The first
-   real run refuted before phase 2, so extract-and-map has only synthetic
-   evidence. Do not tune these until a real SUPPORTED run produces
-   friction data.
+9. **Map threshold on real prose: now measured** (robot-cost-gap run,
+   2026-08-04). A deliberate natural-prose probe of p1 had ALL FOUR
+   sentences rejected at threshold 0.6 despite carrying every sourced
+   number. Observed failure modes: (a) synonym substitution
+   (robot/seeder, runs/sells, farms/fields) defeats token overlap;
+   (b) sentence fusion, one sentence expressing two claims, fails both
+   claims individually; (c) existence-negation sentences ("X does not
+   exist") evade the assertive-sentence extractor entirely, passing with
+   zero checkable sentences. Net: the gate forces receipt-shaped prose.
+   For grant evidence sections that is arguably a feature; for narrative
+   writing it is a real cost. Candidate fixes for 0.0.3: per-claim alias
+   lists, multi-claim joint mapping for fused sentences, and an
+   existence-claim pattern in the extractor. Do not silently lower the
+   threshold; it correctly refused paraphrase drift.
 
 ## Grounding assist (build-trigger check, per design session)
 

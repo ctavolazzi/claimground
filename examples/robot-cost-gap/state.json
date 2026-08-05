@@ -1,0 +1,485 @@
+{
+  "meta": {
+    "slug": "robot-cost-gap",
+    "date": "2026-08-04",
+    "title": "The autonomous-seeding cost gap, stated and grounded"
+  },
+  "constraints": {
+    "voice": "plain declarative, grant-evidence register"
+  },
+  "nodes": [
+    {
+      "id": "c1",
+      "text": "No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season"
+    },
+    {
+      "id": "c2",
+      "text": "The cheapest garden-scale autonomous seeder sells for $7,995"
+    },
+    {
+      "id": "c3",
+      "text": "That seeder's maximum footprint is 3 by 6 meters, 18 square meters"
+    },
+    {
+      "id": "c4",
+      "text": "Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares"
+    },
+    {
+      "id": "c5",
+      "text": "Hired crop labor costs $17.15 per hour at the US median"
+    },
+    {
+      "id": "c6",
+      "text": "A walk-behind push seeder plants a full 30-inch bed in one or two walking passes"
+    },
+    {
+      "id": "c7",
+      "text": "Even by the vendor's own ROI analysis, measured against retail produce prices, FarmBot's direct-cost payback takes years, not one season"
+    },
+    {
+      "id": "a1",
+      "text": "A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold"
+    },
+    {
+      "id": "a2",
+      "text": "FarmBot's maker publishes an ROI analysis showing the robot pays for itself"
+    }
+  ],
+  "edges": [
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c2"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c3"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c4"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c5"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c6"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c7"
+    },
+    {
+      "kind": "attack",
+      "src": "c1",
+      "dst": "a1"
+    },
+    {
+      "kind": "attack",
+      "src": "c1",
+      "dst": "a2"
+    },
+    {
+      "kind": "ground",
+      "claim": "c2",
+      "source": "s1",
+      "locator": "product pricing section near top of page",
+      "quote": "$7,995.00"
+    },
+    {
+      "kind": "ground",
+      "claim": "c3",
+      "source": "s1",
+      "locator": "Nominal machine dimensions section",
+      "quote": "Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)"
+    },
+    {
+      "kind": "ground",
+      "claim": "c4",
+      "source": "s5",
+      "locator": "Scaleable with more robots feature section",
+      "quote": "We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown"
+    },
+    {
+      "kind": "ground",
+      "claim": "c4",
+      "source": "s6",
+      "locator": "[PRICE] ALERT section and main product header",
+      "quote": "$60,000"
+    },
+    {
+      "kind": "ground",
+      "claim": "c5",
+      "source": "s3",
+      "locator": "Wages & Employment Trends section, 2025 BLS wage data",
+      "quote": "$17.15 hourly, $35,660 annual"
+    },
+    {
+      "kind": "ground",
+      "claim": "c6",
+      "source": "s4",
+      "locator": "Description section under main product heading",
+      "quote": "With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed."
+    },
+    {
+      "kind": "ground",
+      "claim": "c7",
+      "source": "s7",
+      "locator": "Analyzing Direct Costs section",
+      "quote": "the ROI period of FarmBot Express is under four years"
+    },
+    {
+      "kind": "ground",
+      "claim": "a2",
+      "source": "s7",
+      "locator": "Scaling to the MAX section",
+      "quote": "FarmBot Express MAX could have a return on investment period that is around 6 months"
+    }
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "ref": "FarmBot Genesis XL v1.8 product page",
+      "url": "https://farm.bot/products/farmbot-genesis-xl-v1-8",
+      "bears_on": "garden robot price growing area dimensions"
+    },
+    {
+      "id": "s2",
+      "ref": "BLS OES 45-2092 Farmworkers and Laborers, Crop (current)",
+      "url": "https://www.bls.gov/oes/current/oes452092.htm",
+      "bears_on": "farm labor hourly wage official"
+    },
+    {
+      "id": "s3",
+      "ref": "O*NET OnLine 45-2092.00 summary (republishes BLS wage data)",
+      "url": "https://www.onetonline.org/link/summary/45-2092.00",
+      "bears_on": "farm labor hourly wage median"
+    },
+    {
+      "id": "s4",
+      "ref": "Paperpot Co, Jang JP5 seeder product page",
+      "url": "https://paperpot.co/product/jang-jp5-seeder/",
+      "bears_on": "push seeder rows passes bed seeding speed"
+    },
+    {
+      "id": "s5",
+      "ref": "FarmDroid FD20 product page",
+      "url": "https://farmdroid.com/products/farmdroid-fd20/",
+      "bears_on": "field seeding robot hectares design target"
+    },
+    {
+      "id": "s6",
+      "ref": "Robotomated FD20 review page",
+      "url": "https://robotomated.com/explore/agricultural/farmdroid-fd20",
+      "bears_on": "field seeding robot price coverage"
+    },
+    {
+      "id": "s7",
+      "ref": "FarmBot official ROI page",
+      "url": "https://farm.bot/pages/roi",
+      "bears_on": "farmbot return on investment payback period savings baseline"
+    }
+  ],
+  "grades": [
+    {
+      "source": "s1",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s2",
+      "grade": "WALLED",
+      "date": "2026-08-04",
+      "note": "HTTP 403 via WebFetch and curl with browser UA (verified in prior run same day); refusal, not a dead citation; wage grounded via s3"
+    },
+    {
+      "source": "s3",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s4",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s5",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s6",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s7",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    }
+  ],
+  "holes": [
+    {
+      "claim": "a1",
+      "why": "Two search sweeps on 2026-08-04 found no such product. The only garden-bed-scale seeder ($7,995, 18 sq m) is roughly two orders of magnitude off on coverage-adjusted cost, and field-scale machines ($60,000, 20-30 hectare design targets) are priced for plots 80 to 120 times larger than a quarter acre. The attack cannot be grounded; it is recorded here so the search is repeatable."
+    }
+  ],
+  "linchpin": [
+    "c7"
+  ],
+  "leaves": [
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "c7",
+    "a2"
+  ],
+  "specs": [
+    {
+      "id": "p1",
+      "claims": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "register": "argument",
+      "label": "main line",
+      "target": 102
+    },
+    {
+      "id": "p2",
+      "claims": [
+        "a1"
+      ],
+      "register": "argument",
+      "label": "objection",
+      "target": 12
+    },
+    {
+      "id": "p3",
+      "claims": [
+        "a2"
+      ],
+      "register": "argument",
+      "label": "objection",
+      "target": 17
+    },
+    {
+      "id": "p4",
+      "claims": [
+        "c7"
+      ],
+      "register": "argument",
+      "label": "linchpin",
+      "target": 17
+    }
+  ],
+  "bindings": [
+    {
+      "spec": "p1",
+      "address": "blk1"
+    },
+    {
+      "spec": "p2",
+      "address": "blk2"
+    },
+    {
+      "spec": "p3",
+      "address": "blk3"
+    },
+    {
+      "spec": "p4",
+      "address": "blk4"
+    }
+  ],
+  "prose": [
+    {
+      "address": "blk1",
+      "kind": "placeholder",
+      "text": "[[passage: p1 | No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season / The cheapest garden-scale autonomous seeder sells for $7,995 / That seeder's maximum footprint is 3 by 6 meters, 18 square meters / Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares / Hired crop labor costs $17.15 per hour at the US median / A walk-behind push seeder plants a full 30-inch bed in one or two walking passes | ~102w]]"
+    },
+    {
+      "address": "blk2",
+      "kind": "placeholder",
+      "text": "[[passage: p2 | A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold | ~12w]]"
+    },
+    {
+      "address": "blk3",
+      "kind": "placeholder",
+      "text": "[[passage: p3 | FarmBot's maker publishes an ROI analysis showing the robot pays for itself | ~17w]]"
+    },
+    {
+      "address": "blk4",
+      "kind": "placeholder",
+      "text": "[[passage: p4 | Even by the vendor's own ROI analysis, measured against retail produce prices, FarmBot's direct-cost payback takes years, not one season | ~17w]]"
+    },
+    {
+      "address": "blk1",
+      "kind": "fill",
+      "text": "Nothing you can buy today will seed a small plot for less than hired hands cost. The cheapest garden robot on the market runs $7,995 and tends a footprint of just 18 square meters. Machines built for real fields, like the $60,000 FarmDroid, are designed for farms of 20 to 30 hectares. Meanwhile a farm worker earning the median $17.15 an hour, pushing a Jang seeder, finishes a bed in two passes."
+    },
+    {
+      "address": "blk1",
+      "kind": "fill",
+      "text": "No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season. The cheapest garden-scale autonomous seeder sells for $7,995. That seeder's maximum footprint is 3 by 6 meters, 18 square meters. Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares. Hired crop labor costs $17.15 per hour at the US median. A walk-behind push seeder plants a full 30-inch bed in one or two walking passes."
+    },
+    {
+      "address": "blk2",
+      "kind": "fill",
+      "text": "A seeder that plants a quarter acre cheaply enough to bring the gap under tenfold does not exist."
+    },
+    {
+      "address": "blk3",
+      "kind": "fill",
+      "text": "FarmBot's maker publishes an ROI analysis showing the robot pays for itself, but against retail produce prices, not hired planting labor."
+    },
+    {
+      "address": "blk4",
+      "kind": "fill",
+      "text": "Even by the vendor's own ROI analysis, measured against retail produce prices, FarmBot's direct-cost payback takes years, not one season."
+    }
+  ],
+  "done": [
+    "p1",
+    "p2",
+    "p3",
+    "p4"
+  ],
+  "trail": [
+    {
+      "event": "intake",
+      "claim": "c1",
+      "date": "2026-08-04",
+      "note": "inverse of the refuted johnny-autoseed-cost claim; same evidence base, opposite assertion"
+    },
+    {
+      "event": "linchpin",
+      "claim": "c7"
+    },
+    {
+      "event": "attach",
+      "claim": "c7",
+      "source": "s7",
+      "locator": "Analyzing Direct Costs",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "work_across",
+      "source": "s7",
+      "touched": "a2",
+      "relation": "support",
+      "note": "ACH rule, both directions in one source: the vendor ROI page grounds the ATTACK (payback claimed, down to 6 months for MAX) at one locator and the LINCHPIN (direct-cost payback under four years, i.e. years not one season, against retail produce at $0.50/cup, not hired labor) at another"
+    },
+    {
+      "event": "work_across",
+      "source": "s1",
+      "touched": "c2,c3",
+      "relation": "support",
+      "note": "re-tested against the inverse graph; same locators as prior run"
+    },
+    {
+      "event": "work_across",
+      "source": "s3",
+      "touched": "c5",
+      "relation": "support",
+      "note": "in the inverse run the LOW median wage supports the root instead of attacking it; direction flipped with the claim, evidence unchanged"
+    },
+    {
+      "event": "hole",
+      "claim": "a1",
+      "date": "2026-08-04",
+      "why": "no such product found; see holes record"
+    },
+    {
+      "event": "note",
+      "text": "s8 candidate (Springer, economics of field-crop robots) redirected WebFetch to an auth wall but answers curl; never read at a locator, so never registered; nothing rests on it"
+    },
+    {
+      "event": "materialize",
+      "spec": "p1",
+      "address": "blk1"
+    },
+    {
+      "event": "materialize",
+      "spec": "p2",
+      "address": "blk2"
+    },
+    {
+      "event": "materialize",
+      "spec": "p3",
+      "address": "blk3"
+    },
+    {
+      "event": "materialize",
+      "spec": "p4",
+      "address": "blk4"
+    },
+    {
+      "event": "fill",
+      "spec": "p1",
+      "words": 75
+    },
+    {
+      "event": "check_failed",
+      "spec": "p1",
+      "date": "2026-08-04",
+      "note": "deliberate natural-prose probe: all 4 sentences UNMAPPED at threshold 0.6 despite carrying every sourced number. Failure modes: (1) synonym substitution (robot/seeder, runs/sells, farms/fields) defeats token overlap; (2) sentence fusion (one sentence expressing two claims) fails both claims individually. Gate forces receipt-shaped prose; calibration datum for FIXES item 9."
+    },
+    {
+      "event": "fill",
+      "spec": "p1",
+      "words": 94
+    },
+    {
+      "event": "spec_done",
+      "spec": "p1",
+      "checks": 3,
+      "extracted": 6
+    },
+    {
+      "event": "fill",
+      "spec": "p2",
+      "words": 18
+    },
+    {
+      "event": "spec_done",
+      "spec": "p2",
+      "checks": 3,
+      "extracted": 0
+    },
+    {
+      "event": "fill",
+      "spec": "p3",
+      "words": 21
+    },
+    {
+      "event": "spec_done",
+      "spec": "p3",
+      "checks": 3,
+      "extracted": 1
+    },
+    {
+      "event": "fill",
+      "spec": "p4",
+      "words": 21
+    },
+    {
+      "event": "spec_done",
+      "spec": "p4",
+      "checks": 3,
+      "extracted": 1
+    }
+  ]
+}

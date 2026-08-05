@@ -1,0 +1,220 @@
+<!-- claimground report v0.0.2 -->
+<!doctype html><html lang='en'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>claimground: The autonomous-seeding cost gap, stated and grounded</title>
+<style>
+:root { --ink:#26211c; --paper:#faf8f3; --card:#ffffff; --line:#d8cdb8;
+  --muted:#7a6b5d; --accent:#e07b3c; --ok:#0d9488; --bad:#c2410c;
+  --mid:#d97706; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e8e2d6; --paper:#191613; --card:#211d19; --line:#3c352c;
+    --muted:#a2937f; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+header.top { position:sticky; top:0; display:flex; align-items:center;
+  gap:12px; padding:10px 20px; background:var(--paper);
+  border-bottom:2px solid var(--line); z-index:5; }
+.brand { font-family:var(--mono); font-weight:700; letter-spacing:.12em;
+  font-size:13px; }
+.chip { font-family:var(--mono); font-size:12px; font-weight:700;
+  padding:3px 10px; border-radius:999px; color:#fff; }
+.chip.SUPPORTED { background:var(--ok); }
+.chip.REFUTED { background:var(--bad); }
+.chip.UNDECIDED { background:var(--mid); }
+#copybtn { margin-left:auto; font:600 13px system-ui; padding:6px 14px;
+  border:2px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+#copybtn:hover { border-color:var(--accent); color:var(--accent); }
+main { max-width:76ch; margin:0 auto; padding:28px 20px 80px; }
+h1 { font-size:26px; line-height:1.3; margin:8px 0 4px; }
+h2 { font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); border-bottom:1px solid var(--line);
+  padding-bottom:4px; margin:36px 0 14px; }
+h3 { font-size:14px; font-family:var(--mono); margin:18px 0 6px; }
+.meta { color:var(--muted); font-size:13px; font-family:var(--mono); }
+.verdict-line { font-size:18px; font-weight:600; }
+article.passage { background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:4px 16px 10px; margin:12px 0; }
+article.passage.objection { border-left-color:var(--mid); }
+article.passage.linchpin { border-left-color:var(--ok); }
+ul.tree { list-style:none; padding-left:0; }
+ul.tree ul { list-style:none; padding-left:22px;
+  border-left:1px solid var(--line); margin:4px 0 4px 6px; }
+ul.tree li { margin:7px 0; }
+.cid { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.badge { font-family:var(--mono); font-size:11px; padding:1px 7px;
+  border-radius:4px; border:1px solid var(--line); margin-left:6px;
+  white-space:nowrap; }
+.badge.live { color:var(--ok); border-color:var(--ok); }
+.badge.dead { color:var(--muted); }
+.badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
+.badge.walled { color:var(--mid); border-color:var(--mid); }
+.receipts { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
+  font:11.5px/1.7 var(--mono); color:var(--muted); }
+.receipts b { color:var(--ink); font-weight:600; }
+.gdate { font:11px var(--mono); color:var(--muted); display:block; }
+.badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
+.badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+  vertical-align:top; }
+th { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); }
+td.mono, .mono { font-family:var(--mono); font-size:12.5px; }
+blockquote { margin:6px 0 0; padding:2px 12px; border-left:3px solid var(--line);
+  color:var(--muted); font-size:13.5px; font-style:italic; }
+details { margin:28px 0; }
+summary { cursor:pointer; font-weight:600; }
+pre.trail { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:12px; font:12px/1.7 var(--mono);
+  overflow-x:auto; }
+.ledger { background:var(--card); border:2px solid var(--bad);
+  border-radius:6px; padding:10px 16px; margin:14px 0; }
+footer { margin-top:48px; color:var(--muted); font-size:12.5px;
+  border-top:1px solid var(--line); padding-top:12px; }
+#copytext { position:absolute; left:-9999px; top:0; }
+a { color:var(--accent); }
+@media print { header.top button { display:none; } }
+</style></head><body>
+<header class='top'><div class='brand'>CLAIMGROUND</div>
+<div class='chip SUPPORTED'>SUPPORTED</div>
+<button id='copybtn'>copy page as text</button></header>
+<main>
+<section><p class='meta'>hypothesis</p><h1>No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season</h1>
+<p class='meta'>2026-08-04 · 9 claims · 7 sources · 22 trail events</p></section>
+<section><h2>Verdict</h2><p class='verdict-line'>SUPPORTED</p><p>The graph closed: every claim is grounded in a live source at a named locator, the objections are grounded and answered, and the linchpin holds.</p></section>
+<section><h2>The work</h2><article class="passage "><h3>p1 · main line · accepted</h3><p>No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season. The cheapest garden-scale autonomous seeder sells for $7,995. That seeder&#x27;s maximum footprint is 3 by 6 meters, 18 square meters. Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares. Hired crop labor costs $17.15 per hour at the US median. A walk-behind push seeder plants a full 30-inch bed in one or two walking passes.</p><div class="receipts"><b>c2</b> &larr; s1 @ product pricing section near top of page [LIVE 2026-08-04]<br><b>c3</b> &larr; s1 @ Nominal machine dimensions section [LIVE 2026-08-04]<br><b>c4</b> &larr; s5 @ Scaleable with more robots feature section [LIVE 2026-08-04]<br><b>c4</b> &larr; s6 @ [PRICE] ALERT section and main product header [LIVE 2026-08-04]<br><b>c5</b> &larr; s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data [LIVE 2026-08-04]<br><b>c6</b> &larr; s4 @ Description section under main product heading [LIVE 2026-08-04]</div></article><article class="passage objection"><h3>p2 · objection · accepted</h3><p>A seeder that plants a quarter acre cheaply enough to bring the gap under tenfold does not exist.</p><div class="receipts"><b>a1</b> &larr; HOLE: Two search sweeps on 2026-08-04 found no such product. The only garden-bed-scale seeder ($7,995, 18 sq m) is roughly two orders of magnitude off on coverage-adjusted cost, and field-scale machines ($60,000, 20-30 hectare design targets) are priced for plots 80 to 120 times larger than a quarter acre. The attack cannot be grounded; it is recorded here so the search is repeatable.</div></article><article class="passage objection"><h3>p3 · objection · accepted</h3><p>FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself, but against retail produce prices, not hired planting labor.</p><div class="receipts"><b>a2</b> &larr; s7 @ Scaling to the MAX section [LIVE 2026-08-04]</div></article><article class="passage linchpin"><h3>p4 · linchpin · accepted</h3><p>Even by the vendor&#x27;s own ROI analysis, measured against retail produce prices, FarmBot&#x27;s direct-cost payback takes years, not one season.</p><div class="receipts"><b>c7</b> &larr; s7 @ Analyzing Direct Costs section [LIVE 2026-08-04]</div></article></section>
+<section><h2>The argument</h2><ul class='tree'><li><span class="cid">c1</span> No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season<ul><li><span class="cid">c2</span> The cheapest garden-scale autonomous seeder sells for $7,995<span class="badge live">s1 @ product pricing section near top of page: LIVE</span></li><li><span class="cid">c3</span> That seeder&#x27;s maximum footprint is 3 by 6 meters, 18 square meters<span class="badge live">s1 @ Nominal machine dimensions section: LIVE</span></li><li><span class="cid">c4</span> Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares<span class="badge live">s5 @ Scaleable with more robots feature section: LIVE</span><span class="badge live">s6 @ [PRICE] ALERT section and main product header: LIVE</span></li><li><span class="cid">c5</span> Hired crop labor costs $17.15 per hour at the US median<span class="badge live">s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data: LIVE</span></li><li><span class="cid">c6</span> A walk-behind push seeder plants a full 30-inch bed in one or two walking passes<span class="badge live">s4 @ Description section under main product heading: LIVE</span></li><li><span class="cid">c7</span> Even by the vendor&#x27;s own ROI analysis, measured against retail produce prices, FarmBot&#x27;s direct-cost payback takes years, not one season<span class="badge linch">LINCHPIN</span><span class="badge live">s7 @ Analyzing Direct Costs section: LIVE</span></li><li><span class="cid">a1</span> A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold<span class="badge attack">ATTACK</span><span class="badge hole">HOLE: Two search sweeps on 2026-08-04 found no such product. Th...</span></li><li><span class="cid">a2</span> FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself<span class="badge attack">ATTACK</span><span class="badge live">s7 @ Scaling to the MAX section: LIVE</span></li></ul></li></ul></section>
+<section><h2>Objections</h2><ul class='tree'><li><span class='cid'>a1</span> A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold <span class='badge live'>not yet grounded</span> (against c1)</li><li><span class='cid'>a2</span> FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself <span class='badge live'>grounded and answered</span> (against c1)</li></ul></section>
+<section><h2>Sources</h2><table><tr><th>id</th><th>source</th><th>grade</th><th>attached to</th></tr><tr><td class='mono'>s1</td><td><a href="https://farm.bot/products/farmbot-genesis-xl-v1-8">FarmBot Genesis XL v1.8 product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c2 @ product pricing section near top of page <blockquote>"$7,995.00"</blockquote><br>c3 @ Nominal machine dimensions section <blockquote>"Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)"</blockquote></td></tr><tr><td class='mono'>s2</td><td><a href="https://www.bls.gov/oes/current/oes452092.htm">BLS OES 45-2092 Farmworkers and Laborers, Crop (current)</a></td><td><span class='badge walled'>WALLED</span><span class='gdate'>graded 2026-08-04</span><span class='gdate'>HTTP 403 via WebFetch and curl with browser UA (verified in prior run same day); refusal, not a dead citation; wage grounded via s3</span></td><td>not attached</td></tr><tr><td class='mono'>s3</td><td><a href="https://www.onetonline.org/link/summary/45-2092.00">O*NET OnLine 45-2092.00 summary (republishes BLS wage data)</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c5 @ Wages &amp; Employment Trends section, 2025 BLS wage data <blockquote>"$17.15 hourly, $35,660 annual"</blockquote></td></tr><tr><td class='mono'>s4</td><td><a href="https://paperpot.co/product/jang-jp5-seeder/">Paperpot Co, Jang JP5 seeder product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c6 @ Description section under main product heading <blockquote>"With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed."</blockquote></td></tr><tr><td class='mono'>s5</td><td><a href="https://farmdroid.com/products/farmdroid-fd20/">FarmDroid FD20 product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c4 @ Scaleable with more robots feature section <blockquote>"We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown"</blockquote></td></tr><tr><td class='mono'>s6</td><td><a href="https://robotomated.com/explore/agricultural/farmdroid-fd20">Robotomated FD20 review page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c4 @ [PRICE] ALERT section and main product header <blockquote>"$60,000"</blockquote></td></tr><tr><td class='mono'>s7</td><td><a href="https://farm.bot/pages/roi">FarmBot official ROI page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c7 @ Analyzing Direct Costs section <blockquote>"the ROI period of FarmBot Express is under four years"</blockquote><br>a2 @ Scaling to the MAX section <blockquote>"FarmBot Express MAX could have a return on investment period that is around 6 months"</blockquote></td></tr></table></section>
+<details><summary>Trail (22 events)</summary><pre class='trail'>event=intake  claim=c1  date=2026-08-04  note=inverse of the refuted johnny-autoseed-cost claim; same evidence base, opposite assertion
+event=linchpin  claim=c7
+event=attach  claim=c7  source=s7  locator=Analyzing Direct Costs  date=2026-08-04
+event=work_across  source=s7  touched=a2  relation=support  note=ACH rule, both directions in one source: the vendor ROI page grounds the ATTACK (payback claimed, down to 6 months for MAX) at one locator and the LINCHPIN (direct-cost payback under four years, i.e. years not one season, against retail produce at $0.50/cup, not hired labor) at another
+event=work_across  source=s1  touched=c2,c3  relation=support  note=re-tested against the inverse graph; same locators as prior run
+event=work_across  source=s3  touched=c5  relation=support  note=in the inverse run the LOW median wage supports the root instead of attacking it; direction flipped with the claim, evidence unchanged
+event=hole  claim=a1  date=2026-08-04  why=no such product found; see holes record
+event=note  text=s8 candidate (Springer, economics of field-crop robots) redirected WebFetch to an auth wall but answers curl; never read at a locator, so never registered; nothing rests on it
+event=materialize  spec=p1  address=blk1
+event=materialize  spec=p2  address=blk2
+event=materialize  spec=p3  address=blk3
+event=materialize  spec=p4  address=blk4
+event=fill  spec=p1  words=75
+event=check_failed  spec=p1  date=2026-08-04  note=deliberate natural-prose probe: all 4 sentences UNMAPPED at threshold 0.6 despite carrying every sourced number. Failure modes: (1) synonym substitution (robot/seeder, runs/sells, farms/fields) defeats token overlap; (2) sentence fusion (one sentence expressing two claims) fails both claims individually. Gate forces receipt-shaped prose; calibration datum for FIXES item 9.
+event=fill  spec=p1  words=94
+event=spec_done  spec=p1  checks=3  extracted=6
+event=fill  spec=p2  words=18
+event=spec_done  spec=p2  checks=3  extracted=0
+event=fill  spec=p3  words=21
+event=spec_done  spec=p3  checks=3  extracted=1
+event=fill  spec=p4  words=21
+event=spec_done  spec=p4  checks=3  extracted=1</pre></details>
+<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.2.</footer>
+</main>
+<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.2)
+Hypothesis: No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season
+Verdict: SUPPORTED
+Date: 2026-08-04
+
+== VERDICT ==
+The graph closed: every claim is grounded in a live source at a named locator, the objections are grounded and answered, and the linchpin holds.
+
+== THE WORK ==
+[p1 · main line · accepted]
+No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season. The cheapest garden-scale autonomous seeder sells for $7,995. That seeder&#x27;s maximum footprint is 3 by 6 meters, 18 square meters. Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares. Hired crop labor costs $17.15 per hour at the US median. A walk-behind push seeder plants a full 30-inch bed in one or two walking passes.
+receipts:
+  c2 &lt;- s1 @ product pricing section near top of page [LIVE 2026-08-04]
+  c3 &lt;- s1 @ Nominal machine dimensions section [LIVE 2026-08-04]
+  c4 &lt;- s5 @ Scaleable with more robots feature section [LIVE 2026-08-04]
+  c4 &lt;- s6 @ [PRICE] ALERT section and main product header [LIVE 2026-08-04]
+  c5 &lt;- s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data [LIVE 2026-08-04]
+  c6 &lt;- s4 @ Description section under main product heading [LIVE 2026-08-04]
+
+[p2 · objection · accepted]
+A seeder that plants a quarter acre cheaply enough to bring the gap under tenfold does not exist.
+receipts:
+  a1 &lt;- HOLE: Two search sweeps on 2026-08-04 found no such product. The only garden-bed-scale seeder ($7,995, 18 sq m) is roughly two orders of magnitude off on coverage-adjusted cost, and field-scale machines ($60,000, 20-30 hectare design targets) are priced for plots 80 to 120 times larger than a quarter acre. The attack cannot be grounded; it is recorded here so the search is repeatable.
+
+[p3 · objection · accepted]
+FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself, but against retail produce prices, not hired planting labor.
+receipts:
+  a2 &lt;- s7 @ Scaling to the MAX section [LIVE 2026-08-04]
+
+[p4 · linchpin · accepted]
+Even by the vendor&#x27;s own ROI analysis, measured against retail produce prices, FarmBot&#x27;s direct-cost payback takes years, not one season.
+receipts:
+  c7 &lt;- s7 @ Analyzing Direct Costs section [LIVE 2026-08-04]
+
+== THE ARGUMENT ==
+- c1 No commercially available autonomous seeder can plant a quarter-acre plot for less than ten times the cost of hired labor in its first season
+  - c2 The cheapest garden-scale autonomous seeder sells for $7,995  [s1 @ product pricing section near top of page: LIVE]
+  - c3 That seeder&#x27;s maximum footprint is 3 by 6 meters, 18 square meters  [s1 @ Nominal machine dimensions section: LIVE]
+  - c4 Field-scale autonomous seeders cost about $60,000 and are designed for fields of 20 to 30 hectares  [s5 @ Scaleable with more robots feature section: LIVE; s6 @ [PRICE] ALERT section and main product header: LIVE]
+  - c5 Hired crop labor costs $17.15 per hour at the US median  [s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data: LIVE]
+  - c6 A walk-behind push seeder plants a full 30-inch bed in one or two walking passes  [s4 @ Description section under main product heading: LIVE]
+  - c7 Even by the vendor&#x27;s own ROI analysis, measured against retail produce prices, FarmBot&#x27;s direct-cost payback takes years, not one season  [LINCHPIN; s7 @ Analyzing Direct Costs section: LIVE]
+  - a1 A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold  [ATTACK; HOLE: Two search sweeps on 2026-08-04 found no such product. The only garden-bed-scale seeder ($7,995, 18 sq m) is roughly two orders of magnitude off on coverage-adjusted cost, and field-scale machines ($60,000, 20-30 hectare design targets) are priced for plots 80 to 120 times larger than a quarter acre. The attack cannot be grounded; it is recorded here so the search is repeatable.]
+  - a2 FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself  [ATTACK; s7 @ Scaling to the MAX section: LIVE]
+
+== OBJECTIONS ==
+- a1 A commercially available seeder exists that plants a quarter acre cheaply enough to bring the gap under tenfold [not yet grounded] (against c1)
+- a2 FarmBot&#x27;s maker publishes an ROI analysis showing the robot pays for itself [grounded and answered] (against c1)
+
+== SOURCES ==
+s1. FarmBot Genesis XL v1.8 product page &lt;https://farm.bot/products/farmbot-genesis-xl-v1-8&gt; [LIVE, graded 2026-08-04]
+    c2 @ product pricing section near top of page :: &quot;$7,995.00&quot;
+    c3 @ Nominal machine dimensions section :: &quot;Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)&quot;
+s2. BLS OES 45-2092 Farmworkers and Laborers, Crop (current) &lt;https://www.bls.gov/oes/current/oes452092.htm&gt; [WALLED, graded 2026-08-04; HTTP 403 via WebFetch and curl with browser UA (verified in prior run same day); refusal, not a dead citation; wage grounded via s3]
+s3. O*NET OnLine 45-2092.00 summary (republishes BLS wage data) &lt;https://www.onetonline.org/link/summary/45-2092.00&gt; [LIVE, graded 2026-08-04]
+    c5 @ Wages &amp; Employment Trends section, 2025 BLS wage data :: &quot;$17.15 hourly, $35,660 annual&quot;
+s4. Paperpot Co, Jang JP5 seeder product page &lt;https://paperpot.co/product/jang-jp5-seeder/&gt; [LIVE, graded 2026-08-04]
+    c6 @ Description section under main product heading :: &quot;With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed.&quot;
+s5. FarmDroid FD20 product page &lt;https://farmdroid.com/products/farmdroid-fd20/&gt; [LIVE, graded 2026-08-04]
+    c4 @ Scaleable with more robots feature section :: &quot;We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown&quot;
+s6. Robotomated FD20 review page &lt;https://robotomated.com/explore/agricultural/farmdroid-fd20&gt; [LIVE, graded 2026-08-04]
+    c4 @ [PRICE] ALERT section and main product header :: &quot;$60,000&quot;
+s7. FarmBot official ROI page &lt;https://farm.bot/pages/roi&gt; [LIVE, graded 2026-08-04]
+    c7 @ Analyzing Direct Costs section :: &quot;the ROI period of FarmBot Express is under four years&quot;
+    a2 @ Scaling to the MAX section :: &quot;FarmBot Express MAX could have a return on investment period that is around 6 months&quot;
+
+== TRAIL ==
+event=intake  claim=c1  date=2026-08-04  note=inverse of the refuted johnny-autoseed-cost claim; same evidence base, opposite assertion
+event=linchpin  claim=c7
+event=attach  claim=c7  source=s7  locator=Analyzing Direct Costs  date=2026-08-04
+event=work_across  source=s7  touched=a2  relation=support  note=ACH rule, both directions in one source: the vendor ROI page grounds the ATTACK (payback claimed, down to 6 months for MAX) at one locator and the LINCHPIN (direct-cost payback under four years, i.e. years not one season, against retail produce at $0.50/cup, not hired labor) at another
+event=work_across  source=s1  touched=c2,c3  relation=support  note=re-tested against the inverse graph; same locators as prior run
+event=work_across  source=s3  touched=c5  relation=support  note=in the inverse run the LOW median wage supports the root instead of attacking it; direction flipped with the claim, evidence unchanged
+event=hole  claim=a1  date=2026-08-04  why=no such product found; see holes record
+event=note  text=s8 candidate (Springer, economics of field-crop robots) redirected WebFetch to an auth wall but answers curl; never read at a locator, so never registered; nothing rests on it
+event=materialize  spec=p1  address=blk1
+event=materialize  spec=p2  address=blk2
+event=materialize  spec=p3  address=blk3
+event=materialize  spec=p4  address=blk4
+event=fill  spec=p1  words=75
+event=check_failed  spec=p1  date=2026-08-04  note=deliberate natural-prose probe: all 4 sentences UNMAPPED at threshold 0.6 despite carrying every sourced number. Failure modes: (1) synonym substitution (robot/seeder, runs/sells, farms/fields) defeats token overlap; (2) sentence fusion (one sentence expressing two claims) fails both claims individually. Gate forces receipt-shaped prose; calibration datum for FIXES item 9.
+event=fill  spec=p1  words=94
+event=spec_done  spec=p1  checks=3  extracted=6
+event=fill  spec=p2  words=18
+event=spec_done  spec=p2  checks=3  extracted=0
+event=fill  spec=p3  words=21
+event=spec_done  spec=p3  checks=3  extracted=1
+event=fill  spec=p4  words=21
+event=spec_done  spec=p4  checks=3  extracted=1
+
+Method: claim graph first, prose second. Every claim above traces to a source at a named locator or is flagged as a hole. github.com/ctavolazzi/claimground</textarea>
+<script>
+document.getElementById('copybtn').addEventListener('click', async () => {
+  const btn = document.getElementById('copybtn');
+  const txt = document.getElementById('copytext').value;
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) {
+    const ta = document.getElementById('copytext');
+    ta.select(); document.execCommand('copy');
+  }
+  btn.textContent = 'copied';
+  setTimeout(() => { btn.textContent = 'copy page as text'; }, 1500);
+});
+</script>
+</body></html>

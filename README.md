@@ -32,6 +32,20 @@ with            try_close: CLOSED | OPEN | BROKEN
 Verdicts: `SUPPORTED | REFUTED(cause) | UNDECIDED`. The verdict is settled
 by the graph, never by the prose.
 
+## Two real runs, same evidence, opposite claims
+
+[examples/robot-cost-gap/](examples/robot-cost-gap/) is the inverse of the
+run below, and it reached **SUPPORTED**
+([live page](https://raw.githack.com/ctavolazzi/claimground/main/examples/robot-cost-gap/report.html)):
+*"No commercially available autonomous seeder can plant a quarter-acre
+plot for less than ten times the cost of hired labor in its first
+season."* Same cached evidence base, one new source (FarmBot's own ROI
+page, which testifies for the objection at one locator and for the
+linchpin at another), full phase-2 pipeline: passages planned, prose
+composed, every sentence mapped back to the graph, receipts rendered
+inline with grades and dates. The pair is the point: the verdicts fall
+out of the graph, not the author's mood.
+
 ## A real run
 
 [examples/johnny-autoseed-cost/](examples/johnny-autoseed-cost/) is the
