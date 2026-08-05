@@ -1,4 +1,4 @@
-<!-- claimground report v0.0.8 -->
+<!-- claimground report v0.0.9 -->
 <!doctype html><html lang='en'><head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>claimground: Standing desks and back pain</title>
@@ -114,8 +114,41 @@ svg .g-so { stroke:var(--bad); }
 svg .g-mid { stroke:var(--muted); }
 svg .n-dead rect { stroke:var(--bad); stroke-width:2.6; }
 svg .e-dead { stroke:var(--bad); stroke-width:2.2; opacity:1; }
-.mapwrap a[data-id], .mapwrap path { transition:opacity .15s ease; }
+.mapwrap a[data-id] { transition:opacity .3s ease; }
 .mapwrap .dim { opacity:.14; }
+.mapwrap g[id^="mn-"], .mapwrap g[id^="mc-"] { transform-box:fill-box;
+  transform-origin:center; transition:opacity .55s ease,
+  transform .55s cubic-bezier(.22,.9,.35,1); }
+.mapwrap path { transition:opacity .6s ease; }
+g.fut { opacity:0; transform:translateY(10px); }
+path.fut { opacity:0; }
+.noanim, .noanim * { transition:none; animation:none; }
+@keyframes cg-pulse { 0%, 100% { transform:scale(1); }
+  50% { transform:scale(1.04); } }
+g.now { animation:cg-pulse .8s ease-in-out 2; }
+.replaybar { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font:12px var(--mono); margin:4px 0 10px; }
+.replaybar button { font:600 12px var(--mono); padding:4px 12px;
+  border:1.5px solid var(--line); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+.replaybar button:hover { border-color:var(--accent); color:var(--accent); }
+.replaybar .ractive, #rscrub { display:none; }
+.replaying .replaybar .ractive { display:inline-flex; gap:8px; }
+.replaying #rscrub { display:inline-block; flex:1; min-width:140px;
+  accent-color:var(--accent); }
+#rstep { color:var(--muted); }
+.capbar { display:none; background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:10px 14px; min-height:60px; font:13px/1.55 var(--mono);
+  margin:0 0 10px; transition:opacity .25s ease, transform .25s ease; }
+.replaying .capbar { display:block; }
+.capbar.capfade { opacity:0; transform:translateY(5px); }
+.capbar .ek { color:var(--accent); font-weight:700; margin-right:8px; }
+#rlog { display:none; font:11.5px/1.9 var(--mono); color:var(--muted);
+  max-height:170px; overflow-y:auto; border-top:1px solid var(--line);
+  padding-top:8px; margin-top:12px; }
+.replaying #rlog { display:block; }
+#rlog b { color:var(--accent); display:inline-block; min-width:96px; }
 svg .schip rect { fill:var(--paper); stroke:var(--line); }
 svg .schip.live rect { stroke:var(--ok); }
 svg .schip.walled rect { stroke:var(--mid); }
@@ -162,15 +195,15 @@ a { color:var(--accent); }
 <p class='meta'>2026-08-04 · 4 claims · 3 sources · 8 trail events</p>
 <div class="stats"><div class='stat'><b>2/3</b><span>leaves live</span></div><div class='stat'><b>0</b><span>holes</span></div><div class='stat'><b>2 LIVE 1 SAYS_OTHERWISE</b><span>sources</span></div><div class='stat'><b>0/1</b><span>objections answered</span></div><div class='stat'><b>bare</b><span>linchpin</span></div></div>
 </section>
-<section id='sec-verdict'><h2>Verdict</h2><p class='verdict-line'>REFUTED(c3: source contradicts)</p><p>The graph broke before any prose was written. Refutation here costs research, never a manuscript.</p><div class="ledger"><strong>Dead claim:</strong> <a class="cid" href="#claim-c3">c3</a> Alternating sitting and standing reduces spinal load<br><strong>Cause:</strong> source contradicts<br>source s2 says otherwise: &quot;no consistent reduction in spinal load was observed&quot;</div></section>
+<section id='sec-verdict'><h2>Verdict</h2><p class='verdict-line'>REFUTED(c3: source contradicts)</p><p>The graph broke before any prose was written. Refutation here costs research, never a manuscript.</p><div class="ledger"><strong>Dead claim:</strong> <a class="cid" href="#claim-c3">c3</a> Alternating sitting and standing reduces spinal load<br><strong>Cause:</strong> source contradicts<br>source s2 says otherwise: &quot;no consistent reduction in spinal load was observed&quot;</div><p class='meta'><a href='#sec-argument' id='rwatch'>watch how the run got here (replay)</a></p></section>
 <section id='sec-work'><h2>The work</h2><p>No prose. The run ended in phase 1, before composition.</p></section>
-<section id='sec-argument'><h2>The argument</h2><div class="mapwrap"><svg viewBox="0 0 644 302" style="width:644px" role="img" aria-label="argument map"><path id="me-c1-c2" d="M322 74 C 322 96, 112 114, 112 136" class="e-need" data-kind="need" data-from="c1" data-to="c2"><title>c1 needs c2</title></path><path id="me-c1-c3" d="M322 74 C 322 96, 322 114, 322 136" class="e-need e-dead" data-kind="need" data-from="c1" data-to="c3"><title>c1 needs c3</title></path><path id="me-c1-c4" d="M322 74 C 322 96, 532 114, 532 136" class="e-attack" data-kind="attack" data-from="c1" data-to="c4"><title>c1 is attacked by c4</title></path><path id="mg-c2-s1" d="M112 194 C 112 220, 107 226, 107 246" class="e-ground g-live" data-kind="ground" data-from="c2" data-to="s1"><title>s1 grounds c2 @ p.4, pooled effect [LIVE] :: &quot;pooled results favored sit-stand interventions&quot;</title></path><path id="mg-c3-s2" d="M322 194 C 322 220, 322 226, 322 246" class="e-ground g-so" data-kind="ground" data-from="c3" data-to="s2"><title>s2 grounds c3 @ section 2, load table [SAYS_OTHERWISE]</title></path><path id="mg-c4-s3" d="M532 194 C 532 220, 537 226, 537 246" class="e-ground g-live" data-kind="ground" data-from="c4" data-to="s3"><title>s3 grounds c4 @ para 3 [LIVE]</title></path><a href="#claim-c1" class="mapnode" data-id="c1"><g id="mn-c1" class="node n-root n-dead"><title>Standing desks reduce back pain for office workers</title><rect x="224" y="16" width="196" height="58" rx="6"/><text x="233" y="32"><tspan class="nid">c1 DEAD</tspan></text><text x="233" y="48">Standing desks reduce</text><text x="233" y="63">back pain for office...</text></g></a><a href="#claim-c2" class="mapnode" data-id="c2"><g id="mn-c2" class="node n-live"><title>Prolonged sitting worsens back pain</title><rect x="14" y="136" width="196" height="58" rx="6"/><text x="23" y="152"><tspan class="nid">c2</tspan></text><text x="23" y="168">Prolonged sitting worsens</text><text x="23" y="183">back pain</text></g></a><a href="#claim-c3" class="mapnode" data-id="c3"><g id="mn-c3" class="node n-linch n-dead"><title>Alternating sitting and standing reduces spinal load</title><rect x="224" y="136" width="196" height="58" rx="6"/><text x="233" y="152"><tspan class="nid">c3 LINCHPIN DEAD</tspan></text><text x="233" y="168">Alternating sitting and</text><text x="233" y="183">standing reduces spi...</text></g></a><a href="#claim-c4" class="mapnode" data-id="c4"><g id="mn-c4" class="node n-attack n-live"><title>Standing all day causes its own pain</title><rect x="434" y="136" width="196" height="58" rx="6"/><text x="443" y="152"><tspan class="nid">c4 ATTACK</tspan></text><text x="443" y="168">Standing all day causes</text><text x="443" y="183">its own pain</text></g></a><a href="#src-s1" class="mapchip" data-id="s1"><g id="mc-s1" class="schip live"><title>Agarwal 2018 systematic review [LIVE]</title><rect x="81" y="256" width="52" height="24" rx="12"/><text x="107" y="272" text-anchor="middle">s1</text></g></a><a href="#src-s2" class="mapchip" data-id="s2"><g id="mc-s2" class="schip so"><title>NIOSH posture guidance page [SAYS_OTHERWISE]</title><rect x="296" y="256" width="52" height="24" rx="12"/><text x="322" y="272" text-anchor="middle">s2</text></g></a><a href="#src-s3" class="mapchip" data-id="s3"><g id="mc-s3" class="schip live"><title>ergonomics field report 2015 [LIVE]</title><rect x="511" y="256" width="52" height="24" rx="12"/><text x="537" y="272" text-anchor="middle">s3</text></g></a></svg></div><div class="map-legend"><span><span class="lg"></span>needs</span><span><span class="lg atk"></span>attacks</span><span><span class="lg grd"></span>grounded in</span><span><span class="lgbox root"></span>hypothesis</span><span><span class="lgbox"></span>live-grounded</span><span><span class="lgbox hole"></span>hole</span><span>chips: sources (hover to light a chain, click to walk it)</span></div><ul class='tree'><li id="claim-c1"><div class="claim-line"><span class="cid">c1</span> Standing desks reduce back pain for office workers</div><ul><li id="claim-c2"><div class="claim-line"><span class="cid">c2</span> Prolonged sitting worsens back pain</div><div class="badge-row"><a class="badge live" href="#src-s1" title="pooled results favored sit-stand interventions">s1 @ p.4, pooled effect: LIVE</a></div></li><li id="claim-c3"><div class="claim-line"><span class="cid">c3</span> Alternating sitting and standing reduces spinal load</div><div class="badge-row"><span class="badge linch">LINCHPIN</span><a class="badge so" href="#src-s2">s2 @ section 2, load table: SAYS_OTHERWISE</a><a class="badge so" href="#src-s2">s2 says otherwise</a></div></li><li id="claim-c4"><div class="claim-line"><span class="cid">c4</span> Standing all day causes its own pain</div><div class="badge-row"><span class="badge attack">ATTACK</span><a class="badge live" href="#src-s3">s3 @ para 3: LIVE</a></div></li></ul></li></ul></section>
+<section id='sec-argument'><h2>The argument</h2><div id='replayroot'><div class='replaybar'><button id='rplay'>replay the run</button><span class='ractive'><button id='rpause'>pause</button><button id='rprev'>&lt;</button><button id='rnext'>&gt;</button><select id='rspeed'><option value='1400'>slow</option><option value='900' selected>normal</option><option value='450'>fast</option></select></span><input type='range' id='rscrub' min='0' max='21' value='0'><span id='rstep' class='ractive'></span></div><div class='capbar' id='capbar'></div><div class="mapwrap"><svg viewBox="0 0 644 302" style="width:644px" role="img" aria-label="argument map"><path id="me-c1-c2" d="M322 74 C 322 96, 112 114, 112 136" class="e-need" data-kind="need" data-from="c1" data-to="c2"><title>c1 needs c2</title></path><path id="me-c1-c3" d="M322 74 C 322 96, 322 114, 322 136" class="e-need e-dead" data-kind="need" data-from="c1" data-to="c3"><title>c1 needs c3</title></path><path id="me-c1-c4" d="M322 74 C 322 96, 532 114, 532 136" class="e-attack" data-kind="attack" data-from="c1" data-to="c4"><title>c1 is attacked by c4</title></path><path id="mg-c2-s1" d="M112 194 C 112 220, 107 226, 107 246" class="e-ground g-live" data-kind="ground" data-from="c2" data-to="s1"><title>s1 grounds c2 @ p.4, pooled effect [LIVE] :: &quot;pooled results favored sit-stand interventions&quot;</title></path><path id="mg-c3-s2" d="M322 194 C 322 220, 322 226, 322 246" class="e-ground g-so" data-kind="ground" data-from="c3" data-to="s2"><title>s2 grounds c3 @ section 2, load table [SAYS_OTHERWISE]</title></path><path id="mg-c4-s3" d="M532 194 C 532 220, 537 226, 537 246" class="e-ground g-live" data-kind="ground" data-from="c4" data-to="s3"><title>s3 grounds c4 @ para 3 [LIVE]</title></path><a href="#claim-c1" class="mapnode" data-id="c1"><g id="mn-c1" class="node n-root n-dead"><title>Standing desks reduce back pain for office workers</title><rect x="224" y="16" width="196" height="58" rx="6"/><text x="233" y="32"><tspan class="nid">c1 DEAD</tspan></text><text x="233" y="48">Standing desks reduce</text><text x="233" y="63">back pain for office...</text></g></a><a href="#claim-c2" class="mapnode" data-id="c2"><g id="mn-c2" class="node n-live"><title>Prolonged sitting worsens back pain</title><rect x="14" y="136" width="196" height="58" rx="6"/><text x="23" y="152"><tspan class="nid">c2</tspan></text><text x="23" y="168">Prolonged sitting worsens</text><text x="23" y="183">back pain</text></g></a><a href="#claim-c3" class="mapnode" data-id="c3"><g id="mn-c3" class="node n-linch n-dead"><title>Alternating sitting and standing reduces spinal load</title><rect x="224" y="136" width="196" height="58" rx="6"/><text x="233" y="152"><tspan class="nid">c3 LINCHPIN DEAD</tspan></text><text x="233" y="168">Alternating sitting and</text><text x="233" y="183">standing reduces spi...</text></g></a><a href="#claim-c4" class="mapnode" data-id="c4"><g id="mn-c4" class="node n-attack n-live"><title>Standing all day causes its own pain</title><rect x="434" y="136" width="196" height="58" rx="6"/><text x="443" y="152"><tspan class="nid">c4 ATTACK</tspan></text><text x="443" y="168">Standing all day causes</text><text x="443" y="183">its own pain</text></g></a><a href="#src-s1" class="mapchip" data-id="s1"><g id="mc-s1" class="schip live"><title>Agarwal 2018 systematic review [LIVE]</title><rect x="81" y="256" width="52" height="24" rx="12"/><text x="107" y="272" text-anchor="middle">s1</text></g></a><a href="#src-s2" class="mapchip" data-id="s2"><g id="mc-s2" class="schip so"><title>NIOSH posture guidance page [SAYS_OTHERWISE]</title><rect x="296" y="256" width="52" height="24" rx="12"/><text x="322" y="272" text-anchor="middle">s2</text></g></a><a href="#src-s3" class="mapchip" data-id="s3"><g id="mc-s3" class="schip live"><title>ergonomics field report 2015 [LIVE]</title><rect x="511" y="256" width="52" height="24" rx="12"/><text x="537" y="272" text-anchor="middle">s3</text></g></a></svg></div><div class="map-legend"><span><span class="lg"></span>needs</span><span><span class="lg atk"></span>attacks</span><span><span class="lg grd"></span>grounded in</span><span><span class="lgbox root"></span>hypothesis</span><span><span class="lgbox"></span>live-grounded</span><span><span class="lgbox hole"></span>hole</span><span>chips: sources (hover to light a chain, click to walk it)</span></div><div id='rlog'></div></div><ul class='tree'><li id="claim-c1"><div class="claim-line"><span class="cid">c1</span> Standing desks reduce back pain for office workers</div><ul><li id="claim-c2"><div class="claim-line"><span class="cid">c2</span> Prolonged sitting worsens back pain</div><div class="badge-row"><a class="badge live" href="#src-s1" title="pooled results favored sit-stand interventions">s1 @ p.4, pooled effect: LIVE</a></div></li><li id="claim-c3"><div class="claim-line"><span class="cid">c3</span> Alternating sitting and standing reduces spinal load</div><div class="badge-row"><span class="badge linch">LINCHPIN</span><a class="badge so" href="#src-s2">s2 @ section 2, load table: SAYS_OTHERWISE</a><a class="badge so" href="#src-s2">s2 says otherwise</a></div></li><li id="claim-c4"><div class="claim-line"><span class="cid">c4</span> Standing all day causes its own pain</div><div class="badge-row"><span class="badge attack">ATTACK</span><a class="badge live" href="#src-s3">s3 @ para 3: LIVE</a></div></li></ul></li></ul></section>
 <section id='sec-objections'><h2>Objections</h2><ul class='tree'><li><a class='cid' href='#claim-c4'>c4</a> Standing all day causes its own pain <span class='badge so'>STANDS, unanswered</span> (against <a href='#claim-c1'>c1</a>)</li></ul></section>
 <section id='sec-sources'><h2>Sources</h2><table><tr><th>id</th><th>source</th><th>grade</th><th>attached to</th></tr><tr id='src-s1'><td class='mono'>s1</td><td><a href="https://example.org/agarwal2018">Agarwal 2018 systematic review</a></td><td><span class='badge live'>LIVE</span></td><td><a href='#claim-c2'>c2</a> @ p.4, pooled effect <blockquote>"pooled results favored sit-stand interventions"</blockquote></td></tr><tr id='src-s2'><td class='mono'>s2</td><td>NIOSH posture guidance page</td><td><span class='badge so'>SAYS_OTHERWISE</span></td><td><a href='#claim-c3'>c3</a> @ section 2, load table</td></tr><tr id='src-s3'><td class='mono'>s3</td><td>ergonomics field report 2015</td><td><span class='badge live'>LIVE</span></td><td><a href='#claim-c4'>c4</a> @ para 3</td></tr></table></section>
 <details id='sec-trail'><summary>Trail (8 events)</summary><div class='trailbox'><div class='tline'><span class='tev'>intake</span>claim=c1</div><div class='tline'><span class='tev'>materialize</span>spec=p1  address=blk1</div><div class='tline'><span class='tev'>materialize</span>spec=p2  address=blk2</div><div class='tline'><span class='tev'>materialize</span>spec=p3  address=blk3</div><div class='tline'><span class='tev'>fill</span>spec=p1  words=24</div><div class='tline'><span class='tev'>fill</span>spec=p2  words=16</div><div class='tline'><span class='tev'>fill</span>spec=p3  words=17</div><div class='tline'><span class='tev'>verdict</span>verdict=REFUTED  claim=c3  cause=source contradicts</div></div></details>
-<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.8.</footer>
+<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.9.</footer>
 </main>
-<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.8)
+<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.9)
 Hypothesis: Standing desks reduce back pain for office workers
 Verdict: REFUTED(c3: source contradicts)
 Date: 2026-08-04
@@ -214,6 +247,7 @@ event=verdict  verdict=REFUTED  claim=c3  cause=source contradicts
 
 Method: claim graph first, prose second. Every claim above traces to a source at a named locator or is flagged as a hole. github.com/ctavolazzi/claimground</textarea>
 
+<script>const TIMELINE = [{"k": "INTAKE", "cap": "One falsifiable sentence: \"Standing desks reduce back pain for office workers\". A reader can disagree; the run may now begin.", "show": ["mn-c1"], "cls": [], "focus": ["mn-c1"]}, {"k": "REGISTER", "cap": "s1: Agarwal 2018 systematic review. Guess at what it might bear on: standing desks back pain sitting office. Nothing trusted yet.", "show": ["mc-s1"], "cls": [], "focus": ["mc-s1"]}, {"k": "REGISTER", "cap": "s2: NIOSH posture guidance page. Guess at what it might bear on: alternating posture standing spinal load. Nothing trusted yet.", "show": ["mc-s2"], "cls": [], "focus": ["mc-s2"]}, {"k": "REGISTER", "cap": "s3: ergonomics field report 2015. Guess at what it might bear on: standing all day pain feet. Nothing trusted yet.", "show": ["mc-s3"], "cls": [], "focus": ["mc-s3"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c2: \"Prolonged sitting worsens back pain\"", "show": ["me-c1-c2", "mn-c2"], "cls": [], "focus": ["mn-c2"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c3: \"Alternating sitting and standing reduces spinal load\"", "show": ["me-c1-c3", "mn-c3"], "cls": [], "focus": ["mn-c3"]}, {"k": "ATTACK", "cap": "Strongest case c1 is false? c4: \"Standing all day causes its own pain\". Attacks get grounded with the same rigor.", "show": ["me-c1-c4", "mn-c4"], "cls": [], "focus": ["mn-c4"]}, {"k": "LINCHPIN", "cap": "c3 is the leaf the whole claim leans on hardest. It gets the strictest sourcing in the run.", "show": [], "cls": [["mn-c3", "n-linch"]], "focus": ["mn-c3"]}, {"k": "ATTACH", "cap": "c2 <- s1 @ p.4, pooled effect  ::  \"pooled results favored sit-stand interventions\"", "show": ["mg-c2-s1"], "cls": [], "focus": ["mn-c2", "mc-s1"]}, {"k": "GRADE", "cap": "FETCH and read s1 at the locator. Grade: LIVE.", "show": [], "cls": [["mc-s1", "live"], ["mn-c2", "n-live"]], "focus": ["mc-s1"]}, {"k": "ATTACH", "cap": "c3 <- s2 @ section 2, load table", "show": ["mg-c3-s2"], "cls": [], "focus": ["mn-c3", "mc-s2"]}, {"k": "GRADE", "cap": "FETCH and read s2 at the locator. Grade: SAYS_OTHERWISE.", "show": [], "cls": [["mc-s2", "so"]], "focus": ["mc-s2"]}, {"k": "ATTACH", "cap": "c4 <- s3 @ para 3", "show": ["mg-c4-s3"], "cls": [], "focus": ["mn-c4", "mc-s3"]}, {"k": "GRADE", "cap": "FETCH and read s3 at the locator. Grade: LIVE.", "show": [], "cls": [["mc-s3", "live"], ["mn-c4", "n-live"]], "focus": ["mc-s3"]}, {"k": "BROKEN", "cap": "try_close: BROKEN(c3, source contradicts). The run ends here, before any prose. A dead claim costs research, never a manuscript.", "show": [], "cls": [["mn-c3", "n-dead"], ["me-c1-c3", "e-dead"], ["mn-c1", "n-dead"]], "focus": ["mn-c3"]}, {"k": "PLAN", "cap": "Passage p1 planned and bound to blk1. Objections and the linchpin always get their own passage.", "show": [], "cls": [], "focus": []}, {"k": "PLAN", "cap": "Passage p2 planned and bound to blk2. Objections and the linchpin always get their own passage.", "show": [], "cls": [], "focus": []}, {"k": "PLAN", "cap": "Passage p3 planned and bound to blk3. Objections and the linchpin always get their own passage.", "show": [], "cls": [], "focus": []}, {"k": "FILL", "cap": "Prose written into p1 (24 words). The writer writes; the graph waits.", "show": [], "cls": [], "focus": []}, {"k": "FILL", "cap": "Prose written into p2 (16 words). The writer writes; the graph waits.", "show": [], "cls": [], "focus": []}, {"k": "FILL", "cap": "Prose written into p3 (17 words). The writer writes; the graph waits.", "show": [], "cls": [], "focus": []}, {"k": "VERDICT", "cap": "REFUTED(c3: source contradicts)", "show": [], "cls": [], "focus": []}];</script>
 <script>
 async function copyText(ta, btn, label) {
   try { await navigator.clipboard.writeText(ta.value); }
@@ -221,9 +255,9 @@ async function copyText(ta, btn, label) {
   btn.textContent = 'copied';
   setTimeout(() => { btn.textContent = label; }, 1400);
 }
-document.getElementById('copybtn').addEventListener('click', () =>
-  copyText(document.getElementById('copytext'),
-           document.getElementById('copybtn'), 'copy page as text'));
+const cb = document.getElementById('copybtn');
+if (cb) cb.addEventListener('click', () =>
+  copyText(document.getElementById('copytext'), cb, 'copy page as text'));
 document.querySelectorAll('.pcopy').forEach(btn =>
   btn.addEventListener('click', () =>
     copyText(document.getElementById(btn.dataset.target), btn, 'copy')));
@@ -269,10 +303,119 @@ if (map) {
     edges.forEach(e => e.classList.remove('dim'));
   }
   items.forEach(el => {
-    el.addEventListener('mouseenter', () =>
-      apply(litSet(el.dataset.id, el.classList.contains('mapchip'))));
+    el.addEventListener('mouseenter', () => {
+      if (window.__cgReplay) return;
+      apply(litSet(el.dataset.id, el.classList.contains('mapchip')));
+    });
     el.addEventListener('mouseleave', clear);
   });
+}
+
+// ---- replay engine: the map builds itself, narrated from the trail ----
+const rroot = document.getElementById('replayroot');
+if (typeof TIMELINE !== 'undefined' && map && rroot) {
+  const T = TIMELINE;
+  const rels = Array.from(map.querySelectorAll(
+    '[id^="mn-"],[id^="mc-"],[id^="me-"],[id^="mg-"]'));
+  const RSTRIP = ['live','walled','so','dead','n-live','n-hole','n-dead',
+                  'e-dead','n-linch'];
+  const capbar = document.getElementById('capbar');
+  const rlog = document.getElementById('rlog');
+  const rscrub = document.getElementById('rscrub');
+  const rstep = document.getElementById('rstep');
+  const rplay = document.getElementById('rplay');
+  const rpause = document.getElementById('rpause');
+  let ri = -1, rt = null;
+  const escd = s => { const d = document.createElement('div');
+    d.textContent = s; return d.innerHTML; };
+  function hud(st) {
+    rscrub.value = ri;
+    rstep.textContent = (ri + 1) + ' / ' + T.length;
+    capbar.classList.add('capfade');
+    setTimeout(() => {
+      capbar.innerHTML = '<span class="ek">' + st.k + '</span>' +
+        escd(st.cap);
+      capbar.classList.remove('capfade');
+    }, 150);
+  }
+  function paint(st) {
+    st.show.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.remove('fut'); });
+    st.cls.forEach(([id, c]) => { const el = document.getElementById(id);
+      if (el) { el.classList.remove('fut'); el.classList.add(c); } });
+    rlog.innerHTML += '<div><b>' + st.k + '</b>' + escd(st.cap) + '</div>';
+  }
+  function focusNow(st) {
+    rels.forEach(el => el.classList.remove('now'));
+    st.focus.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.add('now'); });
+  }
+  function forward() {
+    if (ri >= T.length - 1) return false;
+    ri++;
+    paint(T[ri]); focusNow(T[ri]); hud(T[ri]);
+    rlog.scrollTo({ top: rlog.scrollHeight, behavior: 'smooth' });
+    return true;
+  }
+  function bulkTo(n) {   // instant jump; suppress the transition storm
+    map.classList.add('noanim');
+    rels.forEach(el => { el.classList.add('fut');
+      el.classList.remove('now');
+      RSTRIP.forEach(c => el.classList.remove(c)); });
+    rlog.innerHTML = '';
+    ri = -1;
+    for (let s = 0; s <= n; s++) { ri = s; paint(T[s]); }
+    if (n >= 0) { focusNow(T[n]); hud(T[n]); }
+    map.getBoundingClientRect();
+    map.classList.remove('noanim');
+    rlog.scrollTop = rlog.scrollHeight;
+  }
+  function dwell(st) {
+    const sp = +document.getElementById('rspeed').value;
+    return sp + Math.min(2400, st.cap.length * 14) * (sp / 900);
+  }
+  function loop() {
+    if (!forward()) { stopPlay(); return; }
+    rt = setTimeout(loop, dwell(T[ri]));
+  }
+  function startPlay() { stopPlay(); rpause.textContent = 'pause';
+    rt = setTimeout(loop, 250); }
+  function stopPlay() { if (rt) clearTimeout(rt); rt = null;
+    rpause.textContent = 'play'; }
+  window.__cgReplay = false;
+  function enter() { window.__cgReplay = true;
+    rroot.classList.add('replaying');
+    rplay.textContent = 'exit replay';
+    bulkTo(-1); startPlay(); }
+  function exit() { stopPlay(); window.__cgReplay = false;
+    rroot.classList.remove('replaying');
+    rplay.textContent = 'replay the run';
+    bulkTo(T.length - 1);
+    rels.forEach(el => el.classList.remove('now')); }
+  rplay.addEventListener('click',
+    () => window.__cgReplay ? exit() : enter());
+  rpause.addEventListener('click', () => rt ? stopPlay() : startPlay());
+  document.getElementById('rprev').addEventListener('click',
+    () => { stopPlay(); if (ri > 0) bulkTo(ri - 1); });
+  document.getElementById('rnext').addEventListener('click',
+    () => { stopPlay(); forward(); });
+  rscrub.addEventListener('input',
+    () => { stopPlay(); bulkTo(+rscrub.value); });
+  const rw = document.getElementById('rwatch');
+  if (rw) rw.addEventListener('click',
+    () => { if (!window.__cgReplay) enter(); });
+  const hstep = location.hash.match(/step=(\d+|end)/);
+  const hframe = location.hash.includes('frame');
+  if (hframe) rroot.classList.add('framemode');
+  if (typeof CG_AUTOPLAY !== 'undefined'
+      || location.hash.includes('replay') || hstep) {
+    window.__cgReplay = true;
+    rroot.classList.add('replaying');
+    rplay.textContent = 'exit replay';
+    if (hstep) bulkTo(hstep[1] === 'end' ? T.length - 1
+                      : Math.min(+hstep[1], T.length - 1));
+    else { bulkTo(-1); startPlay(); }
+  }
 }
 </script>
 </body></html>

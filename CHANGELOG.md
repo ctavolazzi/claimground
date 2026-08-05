@@ -109,3 +109,24 @@ quote) before shipping.
   Play / pause / step / scrub / speed; #step=N and #step=end deep-links.
   The replay is an ordered reconstruction from the permanent record, and
   says so. Map elements gained stable per-element ids to support it.
+
+## 0.0.9 (2026-08-04)
+
+- The replay lives inside the report now: "replay the run" in The
+  Argument section turns the report's own map into the animated replay
+  (controls, caption bar, narrated log appear; hover mode suspends;
+  exit restores the final state). "Watch how the run got here" under
+  the verdict starts it too. #replay and #step=N deep-links work on
+  reports as well as standalone pages.
+- Motion smoothed per compositor rules: transform+opacity only, nodes
+  rise in with an eased translate, per-element transitions, a gentle
+  two-beat pulse on the focused element, caption crossfade, smooth log
+  scroll, and bulk jumps (scrub/step-back) apply under a no-animation
+  class so there is no transition storm. Autoplay dwell scales with
+  caption length so long thoughts get read.
+- GIF export: `gif state.json out.gif [width_cap]` renders one frame
+  per step via headless Chrome at the map's natural pixel size (frames
+  never scale down; a too-wide graph warns instead of shrinking type,
+  with multi-row layout deferred until such a graph is real) and
+  assembles with ffmpeg (palette pass, first/last frame holds). The
+  only command that shells out. README embeds the replay GIF.

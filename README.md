@@ -32,6 +32,15 @@ with            try_close: CLOSED | OPEN | BROKEN
 Verdicts: `SUPPORTED | REFUTED(cause) | UNDECIDED`. The verdict is settled
 by the graph, never by the prose.
 
+## Watch a run think
+
+![Animated replay of a claimground run: the argument map builds itself step by step, narrated: intake, source registration, decomposition, grounding with locators and quotes, grading, the close, prose fills and gate accepts](examples/robot-cost-gap/replay.gif)
+
+Every report embeds this replay live (the "replay the run" button in The
+Argument section, or the "watch how the run got here" link under the
+verdict). `replay` exports it as a standalone page; `gif` exports the
+animation above.
+
 ## Two real runs, same evidence, opposite claims
 
 [examples/robot-cost-gap/](examples/robot-cost-gap/) is the inverse of the

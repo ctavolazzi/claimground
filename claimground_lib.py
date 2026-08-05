@@ -64,7 +64,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.8"
+VERSION = "0.0.9"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -618,8 +618,41 @@ svg .g-so { stroke:var(--bad); }
 svg .g-mid { stroke:var(--muted); }
 svg .n-dead rect { stroke:var(--bad); stroke-width:2.6; }
 svg .e-dead { stroke:var(--bad); stroke-width:2.2; opacity:1; }
-.mapwrap a[data-id], .mapwrap path { transition:opacity .15s ease; }
+.mapwrap a[data-id] { transition:opacity .3s ease; }
 .mapwrap .dim { opacity:.14; }
+.mapwrap g[id^="mn-"], .mapwrap g[id^="mc-"] { transform-box:fill-box;
+  transform-origin:center; transition:opacity .55s ease,
+  transform .55s cubic-bezier(.22,.9,.35,1); }
+.mapwrap path { transition:opacity .6s ease; }
+g.fut { opacity:0; transform:translateY(10px); }
+path.fut { opacity:0; }
+.noanim, .noanim * { transition:none; animation:none; }
+@keyframes cg-pulse { 0%, 100% { transform:scale(1); }
+  50% { transform:scale(1.04); } }
+g.now { animation:cg-pulse .8s ease-in-out 2; }
+.replaybar { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font:12px var(--mono); margin:4px 0 10px; }
+.replaybar button { font:600 12px var(--mono); padding:4px 12px;
+  border:1.5px solid var(--line); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+.replaybar button:hover { border-color:var(--accent); color:var(--accent); }
+.replaybar .ractive, #rscrub { display:none; }
+.replaying .replaybar .ractive { display:inline-flex; gap:8px; }
+.replaying #rscrub { display:inline-block; flex:1; min-width:140px;
+  accent-color:var(--accent); }
+#rstep { color:var(--muted); }
+.capbar { display:none; background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:10px 14px; min-height:60px; font:13px/1.55 var(--mono);
+  margin:0 0 10px; transition:opacity .25s ease, transform .25s ease; }
+.replaying .capbar { display:block; }
+.capbar.capfade { opacity:0; transform:translateY(5px); }
+.capbar .ek { color:var(--accent); font-weight:700; margin-right:8px; }
+#rlog { display:none; font:11.5px/1.9 var(--mono); color:var(--muted);
+  max-height:170px; overflow-y:auto; border-top:1px solid var(--line);
+  padding-top:8px; margin-top:12px; }
+.replaying #rlog { display:block; }
+#rlog b { color:var(--accent); display:inline-block; min-width:96px; }
 svg .schip rect { fill:var(--paper); stroke:var(--line); }
 svg .schip.live rect { stroke:var(--ok); }
 svg .schip.walled rect { stroke:var(--mid); }
@@ -665,9 +698,9 @@ async function copyText(ta, btn, label) {
   btn.textContent = 'copied';
   setTimeout(() => { btn.textContent = label; }, 1400);
 }
-document.getElementById('copybtn').addEventListener('click', () =>
-  copyText(document.getElementById('copytext'),
-           document.getElementById('copybtn'), 'copy page as text'));
+const cb = document.getElementById('copybtn');
+if (cb) cb.addEventListener('click', () =>
+  copyText(document.getElementById('copytext'), cb, 'copy page as text'));
 document.querySelectorAll('.pcopy').forEach(btn =>
   btn.addEventListener('click', () =>
     copyText(document.getElementById(btn.dataset.target), btn, 'copy')));
@@ -713,10 +746,119 @@ if (map) {
     edges.forEach(e => e.classList.remove('dim'));
   }
   items.forEach(el => {
-    el.addEventListener('mouseenter', () =>
-      apply(litSet(el.dataset.id, el.classList.contains('mapchip'))));
+    el.addEventListener('mouseenter', () => {
+      if (window.__cgReplay) return;
+      apply(litSet(el.dataset.id, el.classList.contains('mapchip')));
+    });
     el.addEventListener('mouseleave', clear);
   });
+}
+
+// ---- replay engine: the map builds itself, narrated from the trail ----
+const rroot = document.getElementById('replayroot');
+if (typeof TIMELINE !== 'undefined' && map && rroot) {
+  const T = TIMELINE;
+  const rels = Array.from(map.querySelectorAll(
+    '[id^="mn-"],[id^="mc-"],[id^="me-"],[id^="mg-"]'));
+  const RSTRIP = ['live','walled','so','dead','n-live','n-hole','n-dead',
+                  'e-dead','n-linch'];
+  const capbar = document.getElementById('capbar');
+  const rlog = document.getElementById('rlog');
+  const rscrub = document.getElementById('rscrub');
+  const rstep = document.getElementById('rstep');
+  const rplay = document.getElementById('rplay');
+  const rpause = document.getElementById('rpause');
+  let ri = -1, rt = null;
+  const escd = s => { const d = document.createElement('div');
+    d.textContent = s; return d.innerHTML; };
+  function hud(st) {
+    rscrub.value = ri;
+    rstep.textContent = (ri + 1) + ' / ' + T.length;
+    capbar.classList.add('capfade');
+    setTimeout(() => {
+      capbar.innerHTML = '<span class="ek">' + st.k + '</span>' +
+        escd(st.cap);
+      capbar.classList.remove('capfade');
+    }, 150);
+  }
+  function paint(st) {
+    st.show.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.remove('fut'); });
+    st.cls.forEach(([id, c]) => { const el = document.getElementById(id);
+      if (el) { el.classList.remove('fut'); el.classList.add(c); } });
+    rlog.innerHTML += '<div><b>' + st.k + '</b>' + escd(st.cap) + '</div>';
+  }
+  function focusNow(st) {
+    rels.forEach(el => el.classList.remove('now'));
+    st.focus.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.add('now'); });
+  }
+  function forward() {
+    if (ri >= T.length - 1) return false;
+    ri++;
+    paint(T[ri]); focusNow(T[ri]); hud(T[ri]);
+    rlog.scrollTo({ top: rlog.scrollHeight, behavior: 'smooth' });
+    return true;
+  }
+  function bulkTo(n) {   // instant jump; suppress the transition storm
+    map.classList.add('noanim');
+    rels.forEach(el => { el.classList.add('fut');
+      el.classList.remove('now');
+      RSTRIP.forEach(c => el.classList.remove(c)); });
+    rlog.innerHTML = '';
+    ri = -1;
+    for (let s = 0; s <= n; s++) { ri = s; paint(T[s]); }
+    if (n >= 0) { focusNow(T[n]); hud(T[n]); }
+    map.getBoundingClientRect();
+    map.classList.remove('noanim');
+    rlog.scrollTop = rlog.scrollHeight;
+  }
+  function dwell(st) {
+    const sp = +document.getElementById('rspeed').value;
+    return sp + Math.min(2400, st.cap.length * 14) * (sp / 900);
+  }
+  function loop() {
+    if (!forward()) { stopPlay(); return; }
+    rt = setTimeout(loop, dwell(T[ri]));
+  }
+  function startPlay() { stopPlay(); rpause.textContent = 'pause';
+    rt = setTimeout(loop, 250); }
+  function stopPlay() { if (rt) clearTimeout(rt); rt = null;
+    rpause.textContent = 'play'; }
+  window.__cgReplay = false;
+  function enter() { window.__cgReplay = true;
+    rroot.classList.add('replaying');
+    rplay.textContent = 'exit replay';
+    bulkTo(-1); startPlay(); }
+  function exit() { stopPlay(); window.__cgReplay = false;
+    rroot.classList.remove('replaying');
+    rplay.textContent = 'replay the run';
+    bulkTo(T.length - 1);
+    rels.forEach(el => el.classList.remove('now')); }
+  rplay.addEventListener('click',
+    () => window.__cgReplay ? exit() : enter());
+  rpause.addEventListener('click', () => rt ? stopPlay() : startPlay());
+  document.getElementById('rprev').addEventListener('click',
+    () => { stopPlay(); if (ri > 0) bulkTo(ri - 1); });
+  document.getElementById('rnext').addEventListener('click',
+    () => { stopPlay(); forward(); });
+  rscrub.addEventListener('input',
+    () => { stopPlay(); bulkTo(+rscrub.value); });
+  const rw = document.getElementById('rwatch');
+  if (rw) rw.addEventListener('click',
+    () => { if (!window.__cgReplay) enter(); });
+  const hstep = location.hash.match(/step=(\\d+|end)/);
+  const hframe = location.hash.includes('frame');
+  if (hframe) rroot.classList.add('framemode');
+  if (typeof CG_AUTOPLAY !== 'undefined'
+      || location.hash.includes('replay') || hstep) {
+    window.__cgReplay = true;
+    rroot.classList.add('replaying');
+    rplay.textContent = 'exit replay';
+    if (hstep) bulkTo(hstep[1] === 'end' ? T.length - 1
+                      : Math.min(+hstep[1], T.length - 1));
+    else { bulkTo(-1); startPlay(); }
+  }
 }
 """
 
@@ -1125,96 +1267,36 @@ def _replay_steps(state):
     return steps
 
 
-_REPLAY_CSS = """
-.rmain { max-width:1500px; margin:0 auto; padding:14px 20px 60px; }
-.rtitle { font-size:19px; font-weight:700; line-height:1.35; margin:6px 0; }
-.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-  font:12px var(--mono); margin:10px 0; }
-.controls button { font:600 13px var(--mono); padding:5px 14px;
-  border:1.5px solid var(--ink); background:var(--card); color:var(--ink);
-  border-radius:6px; cursor:pointer; }
-.controls button:hover { border-color:var(--accent); color:var(--accent); }
-#scrub { flex:1; min-width:160px; accent-color:var(--accent); }
-#stepno { color:var(--muted); min-width:70px; text-align:right; }
-.capbar { background:var(--card); border:1px solid var(--line);
-  border-left:4px solid var(--accent); border-radius:6px;
-  padding:10px 14px; min-height:64px; font:13.5px/1.55 var(--mono);
-  margin:0 0 12px; }
-.capbar .ek { color:var(--accent); font-weight:700; margin-right:8px; }
-#verdictbig { display:none; font:700 20px var(--mono); margin:10px 0; }
-.fut { opacity:0; }
-.mapwrap g, .mapwrap path { transition:opacity .35s ease; }
-.now rect { stroke-width:3.4; }
-#log { font:11.5px/1.9 var(--mono); color:var(--muted); max-height:180px;
-  overflow-y:auto; border-top:1px solid var(--line); padding-top:8px;
-  margin-top:14px; }
-#log b { color:var(--accent); display:inline-block; min-width:96px; }
+_REPLAY_EXTRA_CSS = """
+.rmain { max-width:1560px; margin:0 auto; padding:14px 20px 60px; }
+.rtitle { font-size:19px; font-weight:700; line-height:1.35;
+  margin:6px 0 10px; }
+.framemode .replaybar, .framemode #rlog { display:none; }
+body:has(.framemode) .rmain { max-width:none; }
+.framemode .mapwrap { width:max-content; max-width:none; left:0;
+  transform:none; }
 """
 
-_REPLAY_JS = """
-const T = TIMELINE;
-const all = Array.from(document.querySelectorAll(
-  '[id^="mn-"],[id^="mc-"],[id^="me-"],[id^="mg-"]'));
-const STRIP = ['live','walled','so','dead','n-live','n-hole','n-dead',
-               'e-dead','n-linch'];
-const cap = document.getElementById('capbar');
-const log = document.getElementById('log');
-const vb = document.getElementById('verdictbig');
-const scrub = document.getElementById('scrub');
-const stepno = document.getElementById('stepno');
-let i = -1, timer = null;
-function esc(s) { const d = document.createElement('div');
-  d.textContent = s; return d.innerHTML; }
-function applyTo(n) {
-  all.forEach(el => { el.classList.add('fut'); el.classList.remove('now');
-    STRIP.forEach(c => el.classList.remove(c)); });
-  log.innerHTML = ''; vb.style.display = 'none';
-  for (let s = 0; s <= n; s++) {
-    const st = T[s];
-    st.show.forEach(id => { const el = document.getElementById(id);
-      if (el) el.classList.remove('fut'); });
-    st.cls.forEach(([id, c]) => { const el = document.getElementById(id);
-      if (el) { el.classList.remove('fut'); el.classList.add(c); } });
-    log.innerHTML += '<div><b>' + st.k + '</b>' + esc(st.cap) + '</div>';
-    if (st.k === 'VERDICT') { vb.textContent = 'VERDICT: ' + st.cap;
-      vb.style.display = 'block'; }
-    if (s === n) {
-      st.focus.forEach(id => { const el = document.getElementById(id);
-        if (el) el.classList.add('now'); });
-      cap.innerHTML = '<span class="ek">' + st.k + '</span>' + esc(st.cap);
-    }
-  }
-  i = n; scrub.value = n;
-  stepno.textContent = (n + 1) + ' / ' + T.length;
-  log.scrollTop = log.scrollHeight;
-}
-function next() { if (i < T.length - 1) applyTo(i + 1); else pause(); }
-function prev() { if (i > 0) applyTo(i - 1); }
-function play() { pause(); document.getElementById('play').textContent =
-  'pause'; timer = setInterval(next,
-  parseInt(document.getElementById('speed').value)); }
-function pause() { if (timer) clearInterval(timer); timer = null;
-  document.getElementById('play').textContent = 'play'; }
-document.getElementById('play').addEventListener('click',
-  () => timer ? pause() : play());
-document.getElementById('nextb').addEventListener('click',
-  () => { pause(); next(); });
-document.getElementById('prevb').addEventListener('click',
-  () => { pause(); prev(); });
-document.getElementById('restart').addEventListener('click',
-  () => { pause(); applyTo(0); play(); });
-scrub.addEventListener('input', () => { pause(); applyTo(+scrub.value); });
-const m = location.hash.match(/step=(\\d+|end)/);
-if (m) { applyTo(m[1] === 'end' ? T.length - 1 : Math.min(+m[1],
-  T.length - 1)); }
-else { applyTo(0); play(); }
-"""
 
+def _replay_controls(n_steps):
+    return ("<div class='replaybar'>"
+            "<button id='rplay'>replay the run</button>"
+            "<span class='ractive'><button id='rpause'>pause</button>"
+            "<button id='rprev'>&lt;</button>"
+            "<button id='rnext'>&gt;</button>"
+            "<select id='rspeed'><option value='1400'>slow</option>"
+            "<option value='900' selected>normal</option>"
+            "<option value='450'>fast</option></select></span>"
+            "<input type='range' id='rscrub' min='0' max='%d' value='0'>"
+            "<span id='rstep' class='ractive'></span></div>"
+            % max(n_steps - 1, 0))
 
 def to_replay(state):
     """Self-contained animated replay of the run: the argument map builds
     itself step by step, narrated from the pipeline order and the trail's
-    own notes. Play, pause, step, scrub; #step=N or #step=end deep-links."""
+    own notes, on the same engine the report page embeds. Autoplays;
+    #step=N / #step=end deep-link; #step=N&frame hides controls (used by
+    the gif exporter)."""
     width, height, body = _svg_parts(state, links=False)
     root = state["nodes"][0] if state["nodes"] else {"text": "(empty)"}
     steps = _replay_steps(state)
@@ -1224,29 +1306,79 @@ def to_replay(state):
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
         "<meta name='viewport' content='width=device-width,initial-scale=1'>",
         "<title>claimground replay: %s</title>" % _esc(root["text"][:60]),
-        "<style>%s%s</style></head><body>" % (_CSS, _REPLAY_CSS),
+        "<style>%s%s</style></head><body>" % (_CSS, _REPLAY_EXTRA_CSS),
         "<div class='rmain'>",
         "<p class='meta'>claimground replay: how the run thought</p>",
         "<div class='rtitle'>%s</div>" % _esc(root["text"]),
-        "<div class='controls'>",
-        "<button id='play'>pause</button>",
-        "<button id='prevb'>&lt; step</button>",
-        "<button id='nextb'>step &gt;</button>",
-        "<button id='restart'>restart</button>",
-        "<select id='speed'><option value='1600'>slow</option>"
-        "<option value='1000' selected>normal</option>"
-        "<option value='500'>fast</option></select>",
-        "<input type='range' id='scrub' min='0' max='%d' value='0'>"
-        % (len(steps) - 1),
-        "<span id='stepno'></span></div>",
+        "<div id='replayroot'>",
+        _replay_controls(len(steps)),
         "<div class='capbar' id='capbar'></div>",
-        "<div id='verdictbig'></div>",
         "<div class='mapwrap'><svg viewBox='0 0 %d %d' style='width:%dpx'>"
         "%s</svg></div>" % (width, height, width, body),
-        "<div id='log'></div>",
-        "</div>",
-        "<script>const TIMELINE = %s;\n%s</script>" % (timeline, _REPLAY_JS),
+        "<div id='rlog'></div>",
+        "</div></div>",
+        "<script>const TIMELINE = %s;\nconst CG_AUTOPLAY = 1;\n%s</script>"
+        % (timeline, _JS),
         "</body></html>"])
+
+
+def export_gif(state, out_gif, width_cap=1600):
+    """Assemble an animated GIF of the replay: one frame per step,
+    rendered at the map's natural pixel size (readability guard: frames
+    are never scaled down; if a graph ever exceeds the cap, this warns
+    instead of silently shrinking the type). The only export that shells
+    out: requires Chrome and ffmpeg."""
+    import shutil
+    import subprocess
+    import tempfile
+    chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    if not Path(chrome).exists():
+        return {"error": "Chrome not found at " + chrome}
+    if not shutil.which("ffmpeg"):
+        return {"error": "ffmpeg not on PATH"}
+    width, height, _ = _svg_parts(state, links=False)
+    win_w = width + 56
+    warning = None
+    if win_w > width_cap:
+        warning = ("map natural width %dpx exceeds cap %dpx; frames will "
+                   "crop, not shrink. A multi-row layout is the deferred "
+                   "fix once a graph this size is real." % (win_w, width_cap))
+        win_w = width_cap
+    win_h = height + 240
+    steps = _replay_steps(state)
+    tmp = Path(tempfile.mkdtemp(prefix="cg-gif-"))
+    page = tmp / "replay.html"
+    page.write_text(to_replay(state), encoding="utf-8")
+    n = 0
+    for i in range(len(steps)):
+        holds = 4 if i == len(steps) - 1 else (2 if i == 0 else 1)
+        frame_src = None
+        for _h in range(holds):
+            dst = tmp / ("f%03d.png" % n)
+            n += 1
+            if frame_src is None:
+                subprocess.run(
+                    [chrome, "--headless=new", "--disable-extensions",
+                     "--window-size=%d,%d" % (win_w, win_h),
+                     "--screenshot=" + str(dst),
+                     "--virtual-time-budget=1500",
+                     "file://%s#step=%d&frame" % (page, i)],
+                    capture_output=True)
+                frame_src = dst
+            else:
+                shutil.copy2(frame_src, dst)
+    subprocess.run(
+        ["ffmpeg", "-y", "-framerate", "1.25", "-i", str(tmp / "f%03d.png"),
+         "-vf", "split[a][b];[a]palettegen=stats_mode=diff[p];"
+         "[b][p]paletteuse=dither=bayer:bayer_scale=4", out_gif],
+        capture_output=True)
+    size = Path(out_gif).stat().st_size if Path(out_gif).exists() else 0
+    shutil.rmtree(tmp)
+    out = {"written": out_gif, "frames": n,
+           "size_kb": round(size / 1024)}
+    if warning:
+        out["warning"] = warning
+    return out
 
 
 def map_svg_standalone(state):
@@ -1323,6 +1455,8 @@ def render(state, out_path):
     meta = state.get("meta") or {}
     stamp = meta.get("date") or date.today().isoformat()
     title = meta.get("title") or root["text"]
+
+    rsteps = _replay_steps(state)
 
     # --- stats strip ---
     leaves_all = [n["id"] for n in state["nodes"]
@@ -1544,12 +1678,16 @@ def render(state, out_path):
         % (stamp, len(state["nodes"]), len(state["sources"]), len(state["trail"])),
         stats_html, "</section>",
         "<section id='sec-verdict'><h2>Verdict</h2>"
-        "<p class='verdict-line'>%s</p><p>%s</p>%s</section>"
+        "<p class='verdict-line'>%s</p><p>%s</p>%s"
+        "<p class='meta'><a href='#sec-argument' id='rwatch'>watch how the "
+        "run got here (replay)</a></p></section>"
         % (_esc(v), _esc(vsent), ledger_html),
         "<section id='sec-work'><h2>The work</h2>%s</section>"
         % "".join(passages_html),
-        "<section id='sec-argument'><h2>The argument</h2>%s%s</section>"
-        % (_svg_map(state), tree_html),
+        "<section id='sec-argument'><h2>The argument</h2>"
+        "<div id='replayroot'>%s<div class='capbar' id='capbar'></div>"
+        "%s<div id='rlog'></div></div>%s</section>"
+        % (_replay_controls(len(rsteps)), _svg_map(state), tree_html),
         "<section id='sec-objections'><h2>Objections</h2><ul class='tree'>%s</ul>"
         "</section>" % "".join(obj_html),
         "<section id='sec-sources'><h2>Sources</h2><table><tr><th>id</th>"
@@ -1566,6 +1704,8 @@ def render(state, out_path):
         "<textarea id='copytext' readonly>%s</textarea>" % _esc(txt),
         "".join("<textarea class='ptext' id='%s' readonly>%s</textarea>"
                 % (_esc(pid), _esc(pt)) for pid, pt in ptas),
+        "<script>const TIMELINE = %s;</script>"
+        % json.dumps(rsteps, ensure_ascii=False).replace("</", "<\\/"),
         "<script>%s</script>" % _JS,
         "</body></html>"])
 
@@ -1695,6 +1835,9 @@ def main(argv):
         Path(rest[0]).write_text(to_replay(state), encoding="utf-8")
         _out({"written": rest[0], "note": "animated run replay; open in a "
               "browser, or deep-link #step=N / #step=end"})
+    elif cmd == "gif":
+        _out(export_gif(state, rest[0],
+                        int(rest[1]) if len(rest) > 1 else 1600))
     else:
         print(__doc__)
         return 1
