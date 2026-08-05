@@ -1,0 +1,255 @@
+<!-- claimground replay v0.0.8 -->
+<!doctype html><html lang='en'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>claimground replay: An autonomous seeding robot plants a quarter-acre plot at lo</title>
+<style>
+:root { --ink:#26211c; --paper:#faf8f3; --card:#ffffff; --line:#d8cdb8;
+  --muted:#7a6b5d; --accent:#e07b3c; --ok:#0d9488; --bad:#c2410c;
+  --mid:#d97706; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e8e2d6; --paper:#191613; --card:#211d19; --line:#3c352c;
+    --muted:#a2937f; } }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+header.top { position:sticky; top:0; display:flex; align-items:center;
+  flex-wrap:wrap; gap:8px 12px; padding:10px 20px; background:var(--paper);
+  border-bottom:2px solid var(--line); z-index:5; }
+.brand { font-family:var(--mono); font-weight:700; letter-spacing:.12em;
+  font-size:13px; }
+nav.toc { display:flex; gap:12px; flex-wrap:wrap; font:600 11px var(--mono); }
+nav.toc a { color:var(--muted); text-decoration:none;
+  text-transform:uppercase; letter-spacing:.06em; }
+nav.toc a:hover { color:var(--accent); }
+.chip { font-family:var(--mono); font-size:12px; font-weight:700;
+  padding:3px 10px; border-radius:999px; color:#fff; }
+.chip.SUPPORTED { background:var(--ok); }
+.chip.REFUTED { background:var(--bad); }
+.chip.UNDECIDED { background:var(--mid); }
+#copybtn { margin-left:auto; font:600 13px system-ui; padding:6px 14px;
+  border:2px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+#copybtn:hover { border-color:var(--accent); color:var(--accent); }
+main { max-width:76ch; margin:0 auto; padding:28px 20px 80px; }
+h1 { font-size:26px; line-height:1.3; margin:8px 0 4px; }
+h2 { font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); border-bottom:1px solid var(--line);
+  padding-bottom:4px; margin:36px 0 14px; }
+h3 { font-size:14px; font-family:var(--mono); margin:18px 0 6px; }
+.meta { color:var(--muted); font-size:13px; font-family:var(--mono); }
+.stats { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 0; }
+.stat { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:6px 12px; min-width:88px; }
+.stat b { display:block; font:700 15px var(--mono); }
+.stat span { font:10.5px var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.05em; }
+.verdict-line { font-size:18px; font-weight:600; }
+article.passage { position:relative; background:var(--card);
+  border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:4px 16px 10px; margin:12px 0; }
+.pcopy { position:absolute; top:10px; right:12px; font:600 11px var(--mono);
+  padding:3px 9px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:5px; cursor:pointer; }
+.pcopy:hover { color:var(--accent); border-color:var(--accent); }
+article.passage.objection { border-left-color:var(--mid); }
+article.passage.linchpin { border-left-color:var(--ok); }
+ul.tree { list-style:none; padding-left:0; }
+ul.tree ul { list-style:none; padding-left:22px;
+  border-left:1px solid var(--line); margin:4px 0 4px 6px; }
+ul.tree li { margin:9px 0; }
+.claim-line { border-radius:4px; }
+.badge-row { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 0 2px; }
+.cid { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.badge { font-family:var(--mono); font-size:11px; padding:1px 7px;
+  border-radius:4px; border:1px solid var(--line);
+  white-space:nowrap; }
+a.badge { text-decoration:none; }
+.badge-row .badge { margin-left:0; }
+.badge.live { color:var(--ok); border-color:var(--ok); }
+.badge.dead { color:var(--muted); }
+.badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
+.badge.walled { color:var(--mid); border-color:var(--mid); }
+.receipts { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
+  font:11.5px/1.7 var(--mono); color:var(--muted); }
+.receipts b { color:var(--ink); font-weight:600; }
+.receipts a { color:inherit; text-decoration:none;
+  border-bottom:1px dotted var(--muted); }
+.receipts a:hover { color:var(--accent); border-color:var(--accent); }
+.gdate { font:11px var(--mono); color:var(--muted); display:block; }
+tr:target td { background:rgba(224,123,60,.14); }
+li:target > .claim-line { background:rgba(224,123,60,.14); }
+:target { scroll-margin-top:80px; }
+.mapwrap { overflow-x:auto; margin:8px 0 4px; position:relative;
+  left:50%; transform:translateX(-50%); width:min(96vw, 1500px); }
+.mapwrap svg { display:block; margin:0 auto; height:auto;
+  font-family:var(--mono); }
+.map-legend { display:flex; flex-wrap:wrap; gap:14px; margin:2px 0 18px;
+  font:11px var(--mono); color:var(--muted); }
+.map-legend span { display:inline-flex; align-items:center; gap:5px; }
+.lg { display:inline-block; width:18px; height:0;
+  border-top:2px solid var(--line); }
+.lg.atk { border-top-style:dashed; border-top-color:var(--mid); }
+.lg.grd { border-top-style:dotted; border-top-color:var(--ok); }
+.lgbox { display:inline-block; width:11px; height:11px; border-radius:3px;
+  background:var(--card); border:1.5px solid var(--ok); }
+.lgbox.hole { border-color:var(--bad); border-style:dashed; }
+.lgbox.root { border-color:var(--accent); }
+svg .node rect { fill:var(--card); stroke:var(--line); stroke-width:1.3; }
+svg .n-live rect { stroke:var(--ok); }
+svg .n-hole rect { stroke:var(--bad); stroke-dasharray:5 3; }
+svg .n-attack rect { stroke:var(--mid); }
+svg .n-linch rect { stroke-width:2.6; }
+svg .n-root rect { stroke:var(--accent); stroke-width:2; }
+svg text { fill:var(--ink); font-size:12.5px; }
+svg .nid { fill:var(--muted); font-weight:700; font-size:11px; }
+svg .e-need { fill:none; stroke:var(--line); stroke-width:1.5; }
+svg .e-attack { fill:none; stroke:var(--mid); stroke-width:1.8;
+  stroke-dasharray:6 4; }
+svg .e-ground { fill:none; stroke-width:1.2; stroke-dasharray:2 4;
+  opacity:.6; }
+svg .g-live { stroke:var(--ok); }
+svg .g-so { stroke:var(--bad); }
+svg .g-mid { stroke:var(--muted); }
+svg .n-dead rect { stroke:var(--bad); stroke-width:2.6; }
+svg .e-dead { stroke:var(--bad); stroke-width:2.2; opacity:1; }
+.mapwrap a[data-id], .mapwrap path { transition:opacity .15s ease; }
+.mapwrap .dim { opacity:.14; }
+svg .schip rect { fill:var(--paper); stroke:var(--line); }
+svg .schip.live rect { stroke:var(--ok); }
+svg .schip.walled rect { stroke:var(--mid); }
+svg .schip.so rect { stroke:var(--bad); }
+svg .schip text { fill:var(--muted); font-size:11px; font-weight:700; }
+.badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
+.badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+  vertical-align:top; }
+th { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); }
+td.mono, .mono { font-family:var(--mono); font-size:12.5px; }
+blockquote { margin:6px 0 0; padding:2px 12px; border-left:3px solid var(--line);
+  color:var(--muted); font-size:13.5px; font-style:italic; }
+details { margin:28px 0; }
+summary { cursor:pointer; font-weight:600; }
+.trailbox { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:10px 14px; font:12px/1.9 var(--mono);
+  overflow-x:auto; margin-top:10px; }
+.tline { white-space:nowrap; }
+.tev { display:inline-block; min-width:104px; color:var(--accent);
+  font-weight:700; }
+.ledger { background:var(--card); border:2px solid var(--bad);
+  border-radius:6px; padding:10px 16px; margin:14px 0; }
+footer { margin-top:48px; color:var(--muted); font-size:12.5px;
+  border-top:1px solid var(--line); padding-top:12px; }
+#copytext, .ptext { position:absolute; left:-9999px; top:0; }
+a { color:var(--accent); }
+@media print {
+  header.top { position:static; }
+  #copybtn, .pcopy, nav.toc { display:none; }
+  :root { --ink:#1a1613; --paper:#fff; --card:#fff; --line:#bbb;
+    --muted:#555; }
+  article.passage, .trailbox, .stat, .ledger { break-inside:avoid; }
+}
+
+.rmain { max-width:1500px; margin:0 auto; padding:14px 20px 60px; }
+.rtitle { font-size:19px; font-weight:700; line-height:1.35; margin:6px 0; }
+.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font:12px var(--mono); margin:10px 0; }
+.controls button { font:600 13px var(--mono); padding:5px 14px;
+  border:1.5px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+.controls button:hover { border-color:var(--accent); color:var(--accent); }
+#scrub { flex:1; min-width:160px; accent-color:var(--accent); }
+#stepno { color:var(--muted); min-width:70px; text-align:right; }
+.capbar { background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:10px 14px; min-height:64px; font:13.5px/1.55 var(--mono);
+  margin:0 0 12px; }
+.capbar .ek { color:var(--accent); font-weight:700; margin-right:8px; }
+#verdictbig { display:none; font:700 20px var(--mono); margin:10px 0; }
+.fut { opacity:0; }
+.mapwrap g, .mapwrap path { transition:opacity .35s ease; }
+.now rect { stroke-width:3.4; }
+#log { font:11.5px/1.9 var(--mono); color:var(--muted); max-height:180px;
+  overflow-y:auto; border-top:1px solid var(--line); padding-top:8px;
+  margin-top:14px; }
+#log b { color:var(--accent); display:inline-block; min-width:96px; }
+</style></head><body>
+<div class='rmain'>
+<p class='meta'>claimground replay: how the run thought</p>
+<div class='rtitle'>An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season</div>
+<div class='controls'>
+<button id='play'>pause</button>
+<button id='prevb'>&lt; step</button>
+<button id='nextb'>step &gt;</button>
+<button id='restart'>restart</button>
+<select id='speed'><option value='1600'>slow</option><option value='1000' selected>normal</option><option value='500'>fast</option></select>
+<input type='range' id='scrub' min='0' max='34' value='0'>
+<span id='stepno'></span></div>
+<div class='capbar' id='capbar'></div>
+<div id='verdictbig'></div>
+<div class='mapwrap'><svg viewBox='0 0 1274 422' style='width:1274px'><path id="me-c1-c2" d="M637 74 C 637 96, 112 114, 112 136" class="e-need" data-kind="need" data-from="c1" data-to="c2"><title>c1 needs c2</title></path><path id="me-c1-c3" d="M637 74 C 637 96, 322 114, 322 136" class="e-need" data-kind="need" data-from="c1" data-to="c3"><title>c1 needs c3</title></path><path id="me-c1-c4" d="M637 74 C 637 96, 532 114, 532 136" class="e-need" data-kind="need" data-from="c1" data-to="c4"><title>c1 needs c4</title></path><path id="me-c1-c5" d="M637 74 C 637 96, 742 114, 742 136" class="e-need" data-kind="need" data-from="c1" data-to="c5"><title>c1 needs c5</title></path><path id="me-c1-c6" d="M637 74 C 637 96, 952 114, 952 136" class="e-need e-dead" data-kind="need" data-from="c1" data-to="c6"><title>c1 needs c6</title></path><path id="me-c1-a1" d="M637 74 C 637 96, 1162 114, 1162 136" class="e-attack" data-kind="attack" data-from="c1" data-to="a1"><title>c1 is attacked by a1</title></path><path id="me-a1-a2" d="M1162 194 C 1162 216, 532 234, 532 256" class="e-need" data-kind="need" data-from="a1" data-to="a2"><title>a1 needs a2</title></path><path id="me-a1-a3" d="M1162 194 C 1162 216, 742 234, 742 256" class="e-need" data-kind="need" data-from="a1" data-to="a3"><title>a1 needs a3</title></path><path id="mg-c2-s1" d="M112 194 C 112 220, 106 346, 106 366" class="e-ground g-live" data-kind="ground" data-from="c2" data-to="s1"><title>s1 grounds c2 @ product pricing section near top of page [LIVE] :: &quot;$7,995.00&quot;</title></path><path id="mg-c3-s1" d="M322 194 C 322 220, 106 346, 106 366" class="e-ground g-live" data-kind="ground" data-from="c3" data-to="s1"><title>s1 grounds c3 @ Nominal machine dimensions section [LIVE] :: &quot;Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)&quot;</title></path><path id="mg-c4-s3" d="M532 194 C 532 220, 531 346, 531 366" class="e-ground g-live" data-kind="ground" data-from="c4" data-to="s3"><title>s3 grounds c4 @ Wages &amp; Employment Trends section, 2025 BLS wage data [LIVE] :: &quot;$17.15 hourly, $35,660 annual&quot;</title></path><path id="mg-c5-s4" d="M742 194 C 742 220, 743 346, 743 366" class="e-ground g-live" data-kind="ground" data-from="c5" data-to="s4"><title>s4 grounds c5 @ Description section under main product heading [LIVE] :: &quot;With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed.&quot;</title></path><path id="mg-a2-s1" d="M532 314 C 532 340, 106 346, 106 366" class="e-ground g-live" data-kind="ground" data-from="a2" data-to="s1"><title>s1 grounds a2 @ product pricing section + Nominal machine dimensions section [LIVE] :: &quot;$7,995.00 ... Width: Up to 3m (Genesis XL); Length: Up to 6m (Genesis XL)&quot;</title></path><path id="mg-a3-s5" d="M742 314 C 742 340, 956 346, 956 366" class="e-ground g-live" data-kind="ground" data-from="a3" data-to="s5"><title>s5 grounds a3 @ Scaleable with more robots feature section [LIVE] :: &quot;We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown&quot;</title></path><path id="mg-a3-s6" d="M742 314 C 742 340, 1168 346, 1168 366" class="e-ground g-live" data-kind="ground" data-from="a3" data-to="s6"><title>s6 grounds a3 @ [PRICE] ALERT section and main product header [LIVE] :: &quot;$60,000&quot;</title></path><g id="mn-c1" class="node n-root n-dead"><title>An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season</title><rect x="539" y="16" width="196" height="58" rx="6"/><text x="548" y="32"><tspan class="nid">c1 DEAD</tspan></text><text x="548" y="48">An autonomous seeding</text><text x="548" y="63">robot plants a quart...</text></g><g id="mn-c2" class="node n-live"><title>A garden-bed-scale autonomous seeding robot can be bought today for about $8,000</title><rect x="14" y="136" width="196" height="58" rx="6"/><text x="23" y="152"><tspan class="nid">c2</tspan></text><text x="23" y="168">A garden-bed-scale</text><text x="23" y="183">autonomous seeding r...</text></g><g id="mn-c3" class="node n-live"><title>The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters</title><rect x="224" y="136" width="196" height="58" rx="6"/><text x="233" y="152"><tspan class="nid">c3</tspan></text><text x="233" y="168">The largest garden-scale</text><text x="233" y="183">autonomous seeder co...</text></g><g id="mn-c4" class="node n-live"><title>Hired crop labor costs about $17 per hour at the US median</title><rect x="434" y="136" width="196" height="58" rx="6"/><text x="443" y="152"><tspan class="nid">c4</tspan></text><text x="443" y="168">Hired crop labor costs</text><text x="443" y="183">about $17 per hour a...</text></g><g id="mn-c5" class="node n-live"><title>A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes</title><rect x="644" y="136" width="196" height="58" rx="6"/><text x="653" y="152"><tspan class="nid">c5</tspan></text><text x="653" y="168">A walk-behind push seeder</text><text x="653" y="183">lets one worker seed...</text></g><g id="mn-c6" class="node n-linch n-hole n-dead"><title>Amortized over one season, the robot&#x27;s cost per bed planted is lower than the hired-labor cost per bed</title><rect x="854" y="136" width="196" height="58" rx="6"/><text x="863" y="152"><tspan class="nid">c6 LINCHPIN HOLE</tspan></text><text x="863" y="168">Amortized over one</text><text x="863" y="183">season, the robot&#x27;s ...</text></g><g id="mn-a1" class="node n-attack"><title>A quarter acre is far too small to amortize any autonomous seeder&#x27;s capital cost within one season</title><rect x="1064" y="136" width="196" height="58" rx="6"/><text x="1073" y="152"><tspan class="nid">a1 ATTACK</tspan></text><text x="1073" y="168">A quarter acre is far too</text><text x="1073" y="183">small to amortize an...</text></g><g id="mn-a2" class="node n-live"><title>Garden-scale automation costs thousands of dollars while covering only a few beds</title><rect x="434" y="256" width="196" height="58" rx="6"/><text x="443" y="272"><tspan class="nid">a2</tspan></text><text x="443" y="288">Garden-scale automation</text><text x="443" y="303">costs thousands of d...</text></g><g id="mn-a3" class="node n-live"><title>Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares</title><rect x="644" y="256" width="196" height="58" rx="6"/><text x="653" y="272"><tspan class="nid">a3</tspan></text><text x="653" y="288">Field-scale seeding</text><text x="653" y="303">robots cost tens of ...</text></g><g id="mc-s1" class="schip live"><title>FarmBot Genesis XL v1.8 product page [LIVE]</title><rect x="80" y="376" width="52" height="24" rx="12"/><text x="106" y="392" text-anchor="middle">s1</text></g><g id="mc-s2" class="schip walled"><title>BLS OES 45-2092 Farmworkers and Laborers, Crop (current) [WALLED]</title><rect x="292" y="376" width="52" height="24" rx="12"/><text x="318" y="392" text-anchor="middle">s2</text></g><g id="mc-s3" class="schip live"><title>O*NET OnLine 45-2092.00 summary (republishes BLS wage data) [LIVE]</title><rect x="505" y="376" width="52" height="24" rx="12"/><text x="531" y="392" text-anchor="middle">s3</text></g><g id="mc-s4" class="schip live"><title>Paperpot Co, Jang JP5 seeder product page [LIVE]</title><rect x="717" y="376" width="52" height="24" rx="12"/><text x="743" y="392" text-anchor="middle">s4</text></g><g id="mc-s5" class="schip live"><title>FarmDroid FD20 product page [LIVE]</title><rect x="930" y="376" width="52" height="24" rx="12"/><text x="956" y="392" text-anchor="middle">s5</text></g><g id="mc-s6" class="schip live"><title>Robotomated FD20 review page [LIVE]</title><rect x="1142" y="376" width="52" height="24" rx="12"/><text x="1168" y="392" text-anchor="middle">s6</text></g></svg></div>
+<div id='log'></div>
+</div>
+<script>const TIMELINE = [{"k": "INTAKE", "cap": "One falsifiable sentence: \"An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season\". A reader can disagree; the run may now begin.", "show": ["mn-c1"], "cls": [], "focus": ["mn-c1"]}, {"k": "REGISTER", "cap": "s1: FarmBot Genesis XL v1.8 product page. Guess at what it might bear on: garden robot price growing area dimensions. Nothing trusted yet.", "show": ["mc-s1"], "cls": [], "focus": ["mc-s1"]}, {"k": "REGISTER", "cap": "s2: BLS OES 45-2092 Farmworkers and Laborers, Crop (current). Guess at what it might bear on: farm labor hourly wage official. Nothing trusted yet.", "show": ["mc-s2"], "cls": [], "focus": ["mc-s2"]}, {"k": "REGISTER", "cap": "s3: O*NET OnLine 45-2092.00 summary (republishes BLS wage data). Guess at what it might bear on: farm labor hourly wage median. Nothing trusted yet.", "show": ["mc-s3"], "cls": [], "focus": ["mc-s3"]}, {"k": "REGISTER", "cap": "s4: Paperpot Co, Jang JP5 seeder product page. Guess at what it might bear on: push seeder rows passes bed seeding speed. Nothing trusted yet.", "show": ["mc-s4"], "cls": [], "focus": ["mc-s4"]}, {"k": "REGISTER", "cap": "s5: FarmDroid FD20 product page. Guess at what it might bear on: field seeding robot hectares capacity design target. Nothing trusted yet.", "show": ["mc-s5"], "cls": [], "focus": ["mc-s5"]}, {"k": "REGISTER", "cap": "s6: Robotomated FD20 review page. Guess at what it might bear on: field seeding robot price coverage. Nothing trusted yet.", "show": ["mc-s6"], "cls": [], "focus": ["mc-s6"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c2: \"A garden-bed-scale autonomous seeding robot can be bought today for about $8,000\"", "show": ["me-c1-c2", "mn-c2"], "cls": [], "focus": ["mn-c2"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c3: \"The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters\"", "show": ["me-c1-c3", "mn-c3"], "cls": [], "focus": ["mn-c3"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c4: \"Hired crop labor costs about $17 per hour at the US median\"", "show": ["me-c1-c4", "mn-c4"], "cls": [], "focus": ["mn-c4"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c5: \"A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes\"", "show": ["me-c1-c5", "mn-c5"], "cls": [], "focus": ["mn-c5"]}, {"k": "DECOMPOSE", "cap": "What must be true for c1 to hold? c6: \"Amortized over one season, the robot's cost per bed planted is lower than the hired-labor cost per bed\"", "show": ["me-c1-c6", "mn-c6"], "cls": [], "focus": ["mn-c6"]}, {"k": "ATTACK", "cap": "Strongest case c1 is false? a1: \"A quarter acre is far too small to amortize any autonomous seeder's capital cost within one season\". Attacks get grounded with the same rigor.", "show": ["me-c1-a1", "mn-a1"], "cls": [], "focus": ["mn-a1"]}, {"k": "DECOMPOSE", "cap": "What must be true for a1 to hold? a2: \"Garden-scale automation costs thousands of dollars while covering only a few beds\"", "show": ["me-a1-a2", "mn-a2"], "cls": [], "focus": ["mn-a2"]}, {"k": "DECOMPOSE", "cap": "What must be true for a1 to hold? a3: \"Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares\"", "show": ["me-a1-a3", "mn-a3"], "cls": [], "focus": ["mn-a3"]}, {"k": "LINCHPIN", "cap": "c6 is the leaf the whole claim leans on hardest. It gets the strictest sourcing in the run.", "show": [], "cls": [["mn-c6", "n-linch"]], "focus": ["mn-c6"]}, {"k": "ATTACH", "cap": "c2 <- s1 @ product pricing section near top of page  ::  \"$7,995.00\"", "show": ["mg-c2-s1"], "cls": [], "focus": ["mn-c2", "mc-s1"]}, {"k": "GRADE", "cap": "FETCH and read s1 at the locator. Grade: LIVE, 2026-08-04.", "show": [], "cls": [["mc-s1", "live"], ["mn-c2", "n-live"]], "focus": ["mc-s1"]}, {"k": "WORK-ACROSS", "cap": "s1 is tested against everything it could touch. ACH rule: the vendor's own price and coverage testify FOR the attack; snippet had claimed $4,395 (v1.7); fetched artifact says $7,995 (v1.8), snippet-vs-artifact lesson confirmed", "show": [], "cls": [], "focus": ["mc-s1"]}, {"k": "ATTACH", "cap": "c3 <- s1 @ Nominal machine dimensions section  ::  \"Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)\"", "show": ["mg-c3-s1"], "cls": [["mn-c3", "n-live"]], "focus": ["mn-c3", "mc-s1"]}, {"k": "ATTACH", "cap": "c4 <- s3 @ Wages & Employment Trends section, 2025 BLS wage data  ::  \"$17.15 hourly, $35,660 annual\"", "show": ["mg-c4-s3"], "cls": [], "focus": ["mn-c4", "mc-s3"]}, {"k": "GRADE", "cap": "FETCH and read s3 at the locator. Grade: LIVE, 2026-08-04.", "show": [], "cls": [["mc-s3", "live"], ["mn-c4", "n-live"]], "focus": ["mc-s3"]}, {"k": "WORK-ACROSS", "cap": "s3 is tested against everything it could touch. the LOW median wage is what makes one-season amortization impossible; wage evidence cuts against the root it was fetched to support", "show": [], "cls": [], "focus": ["mc-s3"]}, {"k": "ATTACH", "cap": "c5 <- s4 @ Description section under main product heading  ::  \"With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed.\"", "show": ["mg-c5-s4"], "cls": [], "focus": ["mn-c5", "mc-s4"]}, {"k": "GRADE", "cap": "FETCH and read s4 at the locator. Grade: LIVE, 2026-08-04.", "show": [], "cls": [["mc-s4", "live"], ["mn-c5", "n-live"]], "focus": ["mc-s4"]}, {"k": "WORK-ACROSS", "cap": "s4 is tested against everything it could touch. fast manual seeding lowers the labor baseline the robot must beat", "show": [], "cls": [], "focus": ["mc-s4"]}, {"k": "ATTACH", "cap": "a2 <- s1 @ product pricing section + Nominal machine dimensions section  ::  \"$7,995.00 ... Width: Up to 3m (Genesis XL); Length: Up to 6m (Genesis XL)\"", "show": ["mg-a2-s1"], "cls": [["mn-a2", "n-live"]], "focus": ["mn-a2", "mc-s1"]}, {"k": "ATTACH", "cap": "a3 <- s5 @ Scaleable with more robots feature section  ::  \"We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown\"", "show": ["mg-a3-s5"], "cls": [], "focus": ["mn-a3", "mc-s5"]}, {"k": "GRADE", "cap": "FETCH and read s5 at the locator. Grade: LIVE, 2026-08-04.", "show": [], "cls": [["mc-s5", "live"], ["mn-a3", "n-live"]], "focus": ["mc-s5"]}, {"k": "ATTACH", "cap": "a3 <- s6 @ [PRICE] ALERT section and main product header  ::  \"$60,000\"", "show": ["mg-a3-s6"], "cls": [], "focus": ["mn-a3", "mc-s6"]}, {"k": "GRADE", "cap": "FETCH and read s6 at the locator. Grade: LIVE, 2026-08-04.", "show": [], "cls": [["mc-s6", "live"], ["mn-a3", "n-live"]], "focus": ["mc-s6"]}, {"k": "GRADE", "cap": "GRADE s2: WALLED. HTTP 403 via WebFetch and via curl with browser UA; refusal, not a dead citation; 403 page archived in cache", "show": [], "cls": [["mc-s2", "walled"]], "focus": ["mc-s2"]}, {"k": "HOLE", "cap": "c6 cannot be grounded, and that is declared, not papered over: No source supports the comparison, and the grounded numbers imply its opposite by roughly two orders of magnitude. The only garden-bed-scale robot on the market costs $7,995 (s1, pricing section) and covers 18 square meters, about 4 standard 30-inch beds (s1, dimensions section), so one-season amortization is roughly $2,000 per bed before installation and upkeep. Hired labor at the $17.15/hr US median (s3) costs under $20 per bed even at a deliberately generous full hour per bed, and a push seeder finishes a bed in one or two walking passes (s4), so the real figure is lower. Field-scale robots amortize worse here: $60,000 (s6) against a 20-to-30-hectare design target (s5) is 80 to 120 times the plot in question.", "show": [], "cls": [["mn-c6", "n-hole"]], "focus": ["mn-c6"]}, {"k": "BROKEN", "cap": "try_close: BROKEN(c6, ungroundable). The run ends here, before any prose. A dead claim costs research, never a manuscript.", "show": [], "cls": [["mn-c6", "n-dead"], ["me-c1-c6", "e-dead"], ["mn-c1", "n-dead"]], "focus": ["mn-c6"]}, {"k": "VERDICT", "cap": "REFUTED(c6: ungroundable)", "show": [], "cls": [], "focus": []}];
+
+const T = TIMELINE;
+const all = Array.from(document.querySelectorAll(
+  '[id^="mn-"],[id^="mc-"],[id^="me-"],[id^="mg-"]'));
+const STRIP = ['live','walled','so','dead','n-live','n-hole','n-dead',
+               'e-dead','n-linch'];
+const cap = document.getElementById('capbar');
+const log = document.getElementById('log');
+const vb = document.getElementById('verdictbig');
+const scrub = document.getElementById('scrub');
+const stepno = document.getElementById('stepno');
+let i = -1, timer = null;
+function esc(s) { const d = document.createElement('div');
+  d.textContent = s; return d.innerHTML; }
+function applyTo(n) {
+  all.forEach(el => { el.classList.add('fut'); el.classList.remove('now');
+    STRIP.forEach(c => el.classList.remove(c)); });
+  log.innerHTML = ''; vb.style.display = 'none';
+  for (let s = 0; s <= n; s++) {
+    const st = T[s];
+    st.show.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.remove('fut'); });
+    st.cls.forEach(([id, c]) => { const el = document.getElementById(id);
+      if (el) { el.classList.remove('fut'); el.classList.add(c); } });
+    log.innerHTML += '<div><b>' + st.k + '</b>' + esc(st.cap) + '</div>';
+    if (st.k === 'VERDICT') { vb.textContent = 'VERDICT: ' + st.cap;
+      vb.style.display = 'block'; }
+    if (s === n) {
+      st.focus.forEach(id => { const el = document.getElementById(id);
+        if (el) el.classList.add('now'); });
+      cap.innerHTML = '<span class="ek">' + st.k + '</span>' + esc(st.cap);
+    }
+  }
+  i = n; scrub.value = n;
+  stepno.textContent = (n + 1) + ' / ' + T.length;
+  log.scrollTop = log.scrollHeight;
+}
+function next() { if (i < T.length - 1) applyTo(i + 1); else pause(); }
+function prev() { if (i > 0) applyTo(i - 1); }
+function play() { pause(); document.getElementById('play').textContent =
+  'pause'; timer = setInterval(next,
+  parseInt(document.getElementById('speed').value)); }
+function pause() { if (timer) clearInterval(timer); timer = null;
+  document.getElementById('play').textContent = 'play'; }
+document.getElementById('play').addEventListener('click',
+  () => timer ? pause() : play());
+document.getElementById('nextb').addEventListener('click',
+  () => { pause(); next(); });
+document.getElementById('prevb').addEventListener('click',
+  () => { pause(); prev(); });
+document.getElementById('restart').addEventListener('click',
+  () => { pause(); applyTo(0); play(); });
+scrub.addEventListener('input', () => { pause(); applyTo(+scrub.value); });
+const m = location.hash.match(/step=(\d+|end)/);
+if (m) { applyTo(m[1] === 'end' ? T.length - 1 : Math.min(+m[1],
+  T.length - 1)); }
+else { applyTo(0); play(); }
+</script>
+</body></html>

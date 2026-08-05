@@ -96,3 +96,16 @@ apostrophes through stemming ("seeder's" never matched "seeder"). All
 previously accepted passages re-verified under the five layers; every
 new layer negative-controlled (number drift, silent omission, invented
 quote) before shipping.
+
+## 0.0.8 (2026-08-04)
+
+- Animated run replay: new `replay` CLI command emits a self-contained
+  page where the argument map builds itself step by step in the
+  pipeline's order, narrated from the trail's own notes: intake, source
+  registration, decompose questions one at a time, attach with locator
+  and quote, fetch-and-grade (chips coloring as grades land, WALLED
+  included), work-across, holes declared, the close verdict (kill path
+  drawn in rust on BROKEN runs), then phase 2 fills and gate accepts.
+  Play / pause / step / scrub / speed; #step=N and #step=end deep-links.
+  The replay is an ordered reconstruction from the permanent record, and
+  says so. Map elements gained stable per-element ids to support it.

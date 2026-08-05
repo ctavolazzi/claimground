@@ -18,6 +18,7 @@ The CLI operates on a state.json file:
     python3 claimground_lib.py render    state.json <out.html>
     python3 claimground_lib.py argdown   state.json <out.argdown>
     python3 claimground_lib.py map       state.json <out.svg>
+    python3 claimground_lib.py replay    state.json <out.html>
 
 The check runs five layers, each owning a failure mode the others cannot
 catch: 1 bytes (word band, banned strings, pointers), 2 extraction (which
@@ -63,7 +64,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.7"
+VERSION = "0.0.8"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -854,11 +855,12 @@ def _svg_parts(state, links=True):
             if (c, k) in dead_edges:
                 cls += " e-dead"
             rel = "is attacked by" if atk else "needs"
-            parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
-                         '%.0f %.0f" class="%s" data-kind="%s" '
+            parts.append('<path id="me-%s-%s" d="M%.0f %.0f C %.0f %.0f, '
+                         '%.0f %.0f, %.0f %.0f" class="%s" data-kind="%s" '
                          'data-from="%s" data-to="%s">'
                          '<title>%s %s %s</title></path>'
-                         % (x1, y1, x1, y1 + 22, x2, y2 - 22, x2, y2, cls,
+                         % (_esc(c), _esc(k), x1, y1, x1, y1 + 22, x2,
+                            y2 - 22, x2, y2, cls,
                             "attack" if atk else "need", _esc(c), _esc(k),
                             _esc(c), rel, _esc(k)))
     for e in state["edges"]:
@@ -875,10 +877,12 @@ def _svg_parts(state, links=True):
                                            e["locator"], g or "ungraded")
         if e.get("quote"):
             tip += ' :: "%s"' % e["quote"]
-        parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
-                     '%.0f %.0f" class="e-ground %s" data-kind="ground" '
-                     'data-from="%s" data-to="%s"><title>%s</title></path>'
-                     % (x1, y1, x1, y1 + 26, x2, y2 - 30, x2, y2 - 10, gcls,
+        parts.append('<path id="mg-%s-%s" d="M%.0f %.0f C %.0f %.0f, '
+                     '%.0f %.0f, %.0f %.0f" class="e-ground %s" '
+                     'data-kind="ground" data-from="%s" data-to="%s">'
+                     '<title>%s</title></path>'
+                     % (_esc(e["claim"]), _esc(e["source"]), x1, y1, x1,
+                        y1 + 26, x2, y2 - 30, x2, y2 - 10, gcls,
                         _esc(e["claim"]), _esc(e["source"]), _esc(tip)))
     holed = {h["claim"] for h in state["holes"]}
     lp = state["linchpin"][-1] if state["linchpin"] else None
@@ -909,12 +913,12 @@ def _svg_parts(state, links=True):
               (" DEAD" if c in dead_path and c not in holed else "")
         if c in dead_path:
             cls += " n-dead"
-        body = ('<g class="%s"><title>%s</title>'
+        body = ('<g id="mn-%s" class="%s"><title>%s</title>'
                 '<rect x="%.0f" y="%.0f" width="%d" height="%d" rx="6"/>'
                 '<text x="%.0f" y="%.0f"><tspan class="nid">%s%s</tspan>'
                 '</text><text x="%.0f" y="%.0f">%s</text>'
                 '<text x="%.0f" y="%.0f">%s</text></g>'
-                % (cls, _esc(text), x, y, NW, NH, x + 9, y + 16,
+                % (_esc(c), cls, _esc(text), x, y, NW, NH, x + 9, y + 16,
                    _esc(c), _esc(tag), x + 9, y + 32, _esc(l1), x + 9,
                    y + 47, _esc(l2)))
         if links:
@@ -927,11 +931,11 @@ def _svg_parts(state, links=True):
         g = (latest_grade(state, s["id"]) or "ungraded").lower()
         gcls = {"live": "live", "walled": "walled",
                 "says_otherwise": "so"}.get(g, "dead")
-        body = ('<g class="schip %s"><title>%s [%s]</title>'
+        body = ('<g id="mc-%s" class="schip %s"><title>%s [%s]</title>'
                 '<rect x="%.0f" y="%.0f" width="52" height="24" rx="12"/>'
                 '<text x="%.0f" y="%.0f" text-anchor="middle">%s</text></g>'
-                % (gcls, _esc(s["ref"]), g.upper(), x - 26, y, x, y + 16,
-                   _esc(s["id"])))
+                % (_esc(s["id"]), gcls, _esc(s["ref"]), g.upper(), x - 26,
+                   y, x, y + 16, _esc(s["id"])))
         if links:
             parts.append('<a href="#src-%s" class="mapchip" data-id="%s">'
                          '%s</a>' % (_esc(s["id"]), _esc(s["id"]), body))
@@ -991,6 +995,258 @@ _MAP_LIGHT_CSS = """
  .schip text { fill:#7a6b5d; font-size:11px; font-weight:700; }
  .maplegend { fill:#7a6b5d; font-size:11px; }
 """
+
+
+def _replay_steps(state):
+    """Timeline of the run for the animated replay: the pipeline's
+    canonical order (intake, register, decompose, ground, close, compose)
+    enriched with the trail's own notes where they exist. An ordered
+    reconstruction of how the run thought, from its permanent record."""
+    steps = []
+
+    def S(kind, cap, show=(), cls=(), focus=()):
+        steps.append({"k": kind, "cap": cap, "show": list(show),
+                      "cls": [list(x) for x in cls], "focus": list(focus)})
+
+    root = state["nodes"][0]
+    S("INTAKE", 'One falsifiable sentence: "%s". A reader can disagree; '
+      'the run may now begin.' % root["text"],
+      show=["mn-" + root["id"]], focus=["mn-" + root["id"]])
+    for s in state["sources"]:
+        S("REGISTER", "%s: %s. Guess at what it might bear on: %s. "
+          "Nothing trusted yet." % (s["id"], s["ref"], s.get("bears_on", "")),
+          show=["mc-" + s["id"]], focus=["mc-" + s["id"]])
+    queue, seen = [root["id"]], {root["id"]}
+    while queue:
+        c = queue.pop(0)
+        for k in need_children(state, c):
+            if k in seen:
+                continue
+            seen.add(k)
+            queue.append(k)
+            S("DECOMPOSE", 'What must be true for %s to hold? %s: "%s"'
+              % (c, k, node(state, k)["text"]),
+              show=["me-%s-%s" % (c, k), "mn-" + k], focus=["mn-" + k])
+        for a in attackers_of(state, c):
+            if a in seen:
+                continue
+            seen.add(a)
+            queue.append(a)
+            S("ATTACK", 'Strongest case %s is false? %s: "%s". Attacks '
+              'get grounded with the same rigor.'
+              % (c, a, node(state, a)["text"]),
+              show=["me-%s-%s" % (c, a), "mn-" + a], focus=["mn-" + a])
+    if state["linchpin"]:
+        lp = state["linchpin"][-1]
+        S("LINCHPIN", "%s is the leaf the whole claim leans on hardest. "
+          "It gets the strictest sourcing in the run." % lp,
+          cls=[["mn-" + lp, "n-linch"]], focus=["mn-" + lp])
+    gmap = {"LIVE": "live", "WALLED": "walled",
+            "SAYS_OTHERWISE": "so", "DEAD": "dead"}
+    wa = [dict(t) for t in state["trail"] if t.get("event") == "work_across"]
+    graded, sources_of = set(), {}
+    for e in state["edges"]:
+        if e["kind"] != "ground":
+            continue
+        cid, sid = e["claim"], e["source"]
+        sources_of.setdefault(sid, []).append(cid)
+        cap = "%s <- %s @ %s" % (cid, sid, e["locator"])
+        if e.get("quote"):
+            cap += '  ::  "%s"' % e["quote"]
+        cls = []
+        if sid in graded and latest_grade(state, sid) == "LIVE":
+            cls.append(["mn-" + cid, "n-live"])
+        S("ATTACH", cap, show=["mg-%s-%s" % (cid, sid)], cls=cls,
+          focus=["mn-" + cid, "mc-" + sid])
+        if sid not in graded:
+            graded.add(sid)
+            rec = latest_grade_rec(state, sid)
+            g = rec.get("grade", "ungraded")
+            cap = "FETCH and read %s at the locator. Grade: %s%s." \
+                % (sid, g, (", " + rec["date"]) if rec.get("date") else "")
+            if rec.get("note"):
+                cap += " " + rec["note"]
+            cls = [["mc-" + sid, gmap.get(g, "dead")]]
+            if g == "LIVE":
+                cls += [["mn-" + x, "n-live"] for x in sources_of[sid]]
+            S("GRADE", cap, cls=cls, focus=["mc-" + sid])
+        for t in wa:
+            if t.get("source") == sid and not t.get("_used"):
+                t["_used"] = True
+                S("WORK-ACROSS", "%s is tested against everything it "
+                  "could touch. %s" % (sid, t.get("note", "")),
+                  focus=["mc-" + sid])
+    for s in state["sources"]:
+        if s["id"] not in graded and latest_grade_rec(state, s["id"]):
+            rec = latest_grade_rec(state, s["id"])
+            g = rec.get("grade", "ungraded")
+            cap = "GRADE %s: %s. %s" % (s["id"], g, rec.get("note", ""))
+            S("GRADE", cap, cls=[["mc-" + s["id"], gmap.get(g, "dead")]],
+              focus=["mc-" + s["id"]])
+    for h in state["holes"]:
+        S("HOLE", "%s cannot be grounded, and that is declared, not "
+          "papered over: %s" % (h["claim"], h["why"]),
+          cls=[["mn-" + h["claim"], "n-hole"]], focus=["mn-" + h["claim"]])
+    res = try_close(state)
+    if res[0] == "CLOSED":
+        S("CLOSE", "try_close walks the six-step rule: nothing floating, "
+          "no hole on the need-chain, no source says otherwise, no attack "
+          "standing, linchpin held. CLOSED. The verdict is settled before "
+          "any prose exists.")
+    elif res[0] == "BROKEN":
+        need_par = {e["dst"]: e["src"] for e in state["edges"]
+                    if e["kind"] == "need"}
+        dead, cur = [res[1]], res[1]
+        cls = [["mn-" + res[1], "n-dead"]]
+        while cur in need_par:
+            cls += [["me-%s-%s" % (need_par[cur], cur), "e-dead"],
+                    ["mn-" + need_par[cur], "n-dead"]]
+            cur = need_par[cur]
+        S("BROKEN", "try_close: BROKEN(%s, %s). The run ends here, before "
+          "any prose. A dead claim costs research, never a manuscript."
+          % (res[1], res[2]), cls=cls, focus=["mn-" + res[1]])
+    for t in state["trail"]:
+        ev = t.get("event")
+        if ev == "materialize":
+            S("PLAN", "Passage %s planned and bound to %s. Objections and "
+              "the linchpin always get their own passage."
+              % (t["spec"], t["address"]))
+        elif ev == "fill":
+            S("FILL", "Prose written into %s (%s words). The writer writes; "
+              "the graph waits." % (t["spec"], t.get("words", "?")))
+        elif ev == "check_failed":
+            S("GATE", "%s rejected: %s"
+              % (t.get("spec", "?"), t.get("note", "named failures; redo")))
+        elif ev == "spec_done":
+            S("ACCEPT", "%s passes every layer of the check "
+              "(%s checkable sentence(s) all traced to the graph)."
+              % (t["spec"], t.get("extracted", "?")))
+    S("VERDICT", verdict(state))
+    return steps
+
+
+_REPLAY_CSS = """
+.rmain { max-width:1500px; margin:0 auto; padding:14px 20px 60px; }
+.rtitle { font-size:19px; font-weight:700; line-height:1.35; margin:6px 0; }
+.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font:12px var(--mono); margin:10px 0; }
+.controls button { font:600 13px var(--mono); padding:5px 14px;
+  border:1.5px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+.controls button:hover { border-color:var(--accent); color:var(--accent); }
+#scrub { flex:1; min-width:160px; accent-color:var(--accent); }
+#stepno { color:var(--muted); min-width:70px; text-align:right; }
+.capbar { background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:10px 14px; min-height:64px; font:13.5px/1.55 var(--mono);
+  margin:0 0 12px; }
+.capbar .ek { color:var(--accent); font-weight:700; margin-right:8px; }
+#verdictbig { display:none; font:700 20px var(--mono); margin:10px 0; }
+.fut { opacity:0; }
+.mapwrap g, .mapwrap path { transition:opacity .35s ease; }
+.now rect { stroke-width:3.4; }
+#log { font:11.5px/1.9 var(--mono); color:var(--muted); max-height:180px;
+  overflow-y:auto; border-top:1px solid var(--line); padding-top:8px;
+  margin-top:14px; }
+#log b { color:var(--accent); display:inline-block; min-width:96px; }
+"""
+
+_REPLAY_JS = """
+const T = TIMELINE;
+const all = Array.from(document.querySelectorAll(
+  '[id^="mn-"],[id^="mc-"],[id^="me-"],[id^="mg-"]'));
+const STRIP = ['live','walled','so','dead','n-live','n-hole','n-dead',
+               'e-dead','n-linch'];
+const cap = document.getElementById('capbar');
+const log = document.getElementById('log');
+const vb = document.getElementById('verdictbig');
+const scrub = document.getElementById('scrub');
+const stepno = document.getElementById('stepno');
+let i = -1, timer = null;
+function esc(s) { const d = document.createElement('div');
+  d.textContent = s; return d.innerHTML; }
+function applyTo(n) {
+  all.forEach(el => { el.classList.add('fut'); el.classList.remove('now');
+    STRIP.forEach(c => el.classList.remove(c)); });
+  log.innerHTML = ''; vb.style.display = 'none';
+  for (let s = 0; s <= n; s++) {
+    const st = T[s];
+    st.show.forEach(id => { const el = document.getElementById(id);
+      if (el) el.classList.remove('fut'); });
+    st.cls.forEach(([id, c]) => { const el = document.getElementById(id);
+      if (el) { el.classList.remove('fut'); el.classList.add(c); } });
+    log.innerHTML += '<div><b>' + st.k + '</b>' + esc(st.cap) + '</div>';
+    if (st.k === 'VERDICT') { vb.textContent = 'VERDICT: ' + st.cap;
+      vb.style.display = 'block'; }
+    if (s === n) {
+      st.focus.forEach(id => { const el = document.getElementById(id);
+        if (el) el.classList.add('now'); });
+      cap.innerHTML = '<span class="ek">' + st.k + '</span>' + esc(st.cap);
+    }
+  }
+  i = n; scrub.value = n;
+  stepno.textContent = (n + 1) + ' / ' + T.length;
+  log.scrollTop = log.scrollHeight;
+}
+function next() { if (i < T.length - 1) applyTo(i + 1); else pause(); }
+function prev() { if (i > 0) applyTo(i - 1); }
+function play() { pause(); document.getElementById('play').textContent =
+  'pause'; timer = setInterval(next,
+  parseInt(document.getElementById('speed').value)); }
+function pause() { if (timer) clearInterval(timer); timer = null;
+  document.getElementById('play').textContent = 'play'; }
+document.getElementById('play').addEventListener('click',
+  () => timer ? pause() : play());
+document.getElementById('nextb').addEventListener('click',
+  () => { pause(); next(); });
+document.getElementById('prevb').addEventListener('click',
+  () => { pause(); prev(); });
+document.getElementById('restart').addEventListener('click',
+  () => { pause(); applyTo(0); play(); });
+scrub.addEventListener('input', () => { pause(); applyTo(+scrub.value); });
+const m = location.hash.match(/step=(\\d+|end)/);
+if (m) { applyTo(m[1] === 'end' ? T.length - 1 : Math.min(+m[1],
+  T.length - 1)); }
+else { applyTo(0); play(); }
+"""
+
+
+def to_replay(state):
+    """Self-contained animated replay of the run: the argument map builds
+    itself step by step, narrated from the pipeline order and the trail's
+    own notes. Play, pause, step, scrub; #step=N or #step=end deep-links."""
+    width, height, body = _svg_parts(state, links=False)
+    root = state["nodes"][0] if state["nodes"] else {"text": "(empty)"}
+    steps = _replay_steps(state)
+    timeline = json.dumps(steps, ensure_ascii=False).replace("</", "<\\/")
+    return "\n".join([
+        "<!-- claimground replay v%s -->" % VERSION,
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>",
+        "<title>claimground replay: %s</title>" % _esc(root["text"][:60]),
+        "<style>%s%s</style></head><body>" % (_CSS, _REPLAY_CSS),
+        "<div class='rmain'>",
+        "<p class='meta'>claimground replay: how the run thought</p>",
+        "<div class='rtitle'>%s</div>" % _esc(root["text"]),
+        "<div class='controls'>",
+        "<button id='play'>pause</button>",
+        "<button id='prevb'>&lt; step</button>",
+        "<button id='nextb'>step &gt;</button>",
+        "<button id='restart'>restart</button>",
+        "<select id='speed'><option value='1600'>slow</option>"
+        "<option value='1000' selected>normal</option>"
+        "<option value='500'>fast</option></select>",
+        "<input type='range' id='scrub' min='0' max='%d' value='0'>"
+        % (len(steps) - 1),
+        "<span id='stepno'></span></div>",
+        "<div class='capbar' id='capbar'></div>",
+        "<div id='verdictbig'></div>",
+        "<div class='mapwrap'><svg viewBox='0 0 %d %d' style='width:%dpx'>"
+        "%s</svg></div>" % (width, height, width, body),
+        "<div id='log'></div>",
+        "</div>",
+        "<script>const TIMELINE = %s;\n%s</script>" % (timeline, _REPLAY_JS),
+        "</body></html>"])
 
 
 def map_svg_standalone(state):
@@ -1435,6 +1691,10 @@ def main(argv):
         Path(rest[0]).write_text(map_svg_standalone(state), encoding="utf-8")
         _out({"written": rest[0], "note": "standalone light-palette SVG, "
               "print-ready"})
+    elif cmd == "replay":
+        Path(rest[0]).write_text(to_replay(state), encoding="utf-8")
+        _out({"written": rest[0], "note": "animated run replay; open in a "
+              "browser, or deep-link #step=N / #step=end"})
     else:
         print(__doc__)
         return 1
