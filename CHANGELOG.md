@@ -66,3 +66,10 @@ Map interactivity and export:
 - New `map` CLI command: standalone print-ready map.svg on a light warm
   paper palette (status colors re-stepped to >= 4.5:1 contrast), no
   anchors, in-SVG worded legend. Both real runs ship with map.svg.
+
+## 0.0.6 (2026-08-04)
+
+- Map readability: the map now breaks out of the 76ch text column
+  full-bleed and renders at its natural pixel size (horizontal scroll on
+  narrow windows) instead of scaling its type down to fit. Node boxes,
+  chips, and type enlarged (12.5px body, 11px ids).

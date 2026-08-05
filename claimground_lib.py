@@ -51,7 +51,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -480,8 +480,9 @@ a.badge { text-decoration:none; }
 tr:target td { background:rgba(224,123,60,.14); }
 li:target > .claim-line { background:rgba(224,123,60,.14); }
 :target { scroll-margin-top:80px; }
-.mapwrap { overflow-x:auto; margin:8px 0 4px; }
-.mapwrap svg { min-width:720px; width:100%; height:auto;
+.mapwrap { overflow-x:auto; margin:8px 0 4px; position:relative;
+  left:50%; transform:translateX(-50%); width:min(96vw, 1500px); }
+.mapwrap svg { display:block; margin:0 auto; height:auto;
   font-family:var(--mono); }
 .map-legend { display:flex; flex-wrap:wrap; gap:14px; margin:2px 0 18px;
   font:11px var(--mono); color:var(--muted); }
@@ -500,8 +501,8 @@ svg .n-hole rect { stroke:var(--bad); stroke-dasharray:5 3; }
 svg .n-attack rect { stroke:var(--mid); }
 svg .n-linch rect { stroke-width:2.6; }
 svg .n-root rect { stroke:var(--accent); stroke-width:2; }
-svg text { fill:var(--ink); font-size:10.5px; }
-svg .nid { fill:var(--muted); font-weight:700; font-size:10px; }
+svg text { fill:var(--ink); font-size:12.5px; }
+svg .nid { fill:var(--muted); font-weight:700; font-size:11px; }
 svg .e-need { fill:none; stroke:var(--line); stroke-width:1.5; }
 svg .e-attack { fill:none; stroke:var(--mid); stroke-width:1.8;
   stroke-dasharray:6 4; }
@@ -518,7 +519,7 @@ svg .schip rect { fill:var(--paper); stroke:var(--line); }
 svg .schip.live rect { stroke:var(--ok); }
 svg .schip.walled rect { stroke:var(--mid); }
 svg .schip.so rect { stroke:var(--bad); }
-svg .schip text { fill:var(--muted); font-size:10px; font-weight:700; }
+svg .schip text { fill:var(--muted); font-size:11px; font-weight:700; }
 .badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
 .badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
@@ -710,7 +711,7 @@ def _svg_parts(state, links=True):
                 queue.append(k)
     depth = max(layer.values()) + 1
     layers = [[c for c in order if layer[c] == i] for i in range(depth)]
-    NW, NH, GX, GY = 170, 50, 14, 52
+    NW, NH, GX, GY = 196, 58, 14, 62
     width = max(len(l) for l in layers) * (NW + GX) + GX
     src_y = 16 + depth * (NH + GY)
     height = src_y + 46
@@ -793,11 +794,11 @@ def _svg_parts(state, links=True):
             cls += " n-live"
         text = node(state, c)["text"]
         ws, l1 = text.split(), ""
-        while ws and len(l1) + len(ws[0]) + 1 <= 26:
+        while ws and len(l1) + len(ws[0]) + 1 <= 25:
             l1 += ("" if not l1 else " ") + ws.pop(0)
         l2 = " ".join(ws)
-        if len(l2) > 24:
-            l2 = l2[:21] + "..."
+        if len(l2) > 23:
+            l2 = l2[:20] + "..."
         tag = (" ATTACK" if c in attack_nodes else "") + \
               (" LINCHPIN" if c == lp else "") + \
               (" HOLE" if c in holed else "") + \
@@ -809,9 +810,9 @@ def _svg_parts(state, links=True):
                 '<text x="%.0f" y="%.0f"><tspan class="nid">%s%s</tspan>'
                 '</text><text x="%.0f" y="%.0f">%s</text>'
                 '<text x="%.0f" y="%.0f">%s</text></g>'
-                % (cls, _esc(text), x, y, NW, NH, x + 8, y + 14,
-                   _esc(c), _esc(tag), x + 8, y + 27, _esc(l1), x + 8,
-                   y + 39, _esc(l2)))
+                % (cls, _esc(text), x, y, NW, NH, x + 9, y + 16,
+                   _esc(c), _esc(tag), x + 9, y + 32, _esc(l1), x + 9,
+                   y + 47, _esc(l2)))
         if links:
             parts.append('<a href="#claim-%s" class="mapnode" data-id="%s">'
                          '%s</a>' % (_esc(c), _esc(c), body))
@@ -823,9 +824,9 @@ def _svg_parts(state, links=True):
         gcls = {"live": "live", "walled": "walled",
                 "says_otherwise": "so"}.get(g, "dead")
         body = ('<g class="schip %s"><title>%s [%s]</title>'
-                '<rect x="%.0f" y="%.0f" width="44" height="20" rx="10"/>'
+                '<rect x="%.0f" y="%.0f" width="52" height="24" rx="12"/>'
                 '<text x="%.0f" y="%.0f" text-anchor="middle">%s</text></g>'
-                % (gcls, _esc(s["ref"]), g.upper(), x - 22, y, x, y + 14,
+                % (gcls, _esc(s["ref"]), g.upper(), x - 26, y, x, y + 16,
                    _esc(s["id"])))
         if links:
             parts.append('<a href="#src-%s" class="mapchip" data-id="%s">'
@@ -849,17 +850,20 @@ def _svg_map(state):
               '<span><span class="lgbox hole"></span>hole</span>'
               '<span>chips: sources (hover to light a chain, click to '
               'walk it)</span></div>')
+    # natural pixel size, never scaled down: the column is 76ch but the
+    # map breaks out full-bleed and scrolls instead of shrinking its type
     return ('<div class="mapwrap"><svg viewBox="0 0 %d %d" '
-            'role="img" aria-label="argument map">%s</svg></div>%s'
-            % (width, height, body, legend))
+            'style="width:%dpx" role="img" aria-label="argument map">'
+            '%s</svg></div>%s'
+            % (width, height, width, body, legend))
 
 
 # Standalone export palette: FogSift-family status colors re-stepped for
 # a warm paper surface (all >= 4.5:1 on #faf8f3), since the report's CSS
 # variables do not travel with a bare .svg file.
 _MAP_LIGHT_CSS = """
- text { fill:#3a312b; font-size:10.5px; }
- .nid { fill:#7a6b5d; font-weight:700; font-size:10px; }
+ text { fill:#3a312b; font-size:12.5px; }
+ .nid { fill:#7a6b5d; font-weight:700; font-size:11px; }
  .node rect { fill:#ffffff; stroke:#b8a88a; stroke-width:1.3; }
  .n-live rect { stroke:#0f766e; }
  .n-hole rect { stroke:#bd2436; stroke-dasharray:5 3; }
@@ -880,7 +884,7 @@ _MAP_LIGHT_CSS = """
  .schip.live rect { stroke:#0f766e; }
  .schip.walled rect { stroke:#b45309; }
  .schip.so rect { stroke:#bd2436; }
- .schip text { fill:#7a6b5d; font-size:10px; font-weight:700; }
+ .schip text { fill:#7a6b5d; font-size:11px; font-weight:700; }
  .maplegend { fill:#7a6b5d; font-size:11px; }
 """
 
