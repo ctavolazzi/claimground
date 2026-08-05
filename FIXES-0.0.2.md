@@ -55,6 +55,16 @@ No speculative features.
    existence-claim pattern in the extractor. Do not silently lower the
    threshold; it correctly refused paraphrase drift.
 
+   SHIPPED in 0.0.7, all three, plus two new layers: the check is now
+   five layers (bytes, extraction, mapping, coverage, custody). Coverage
+   fails silent omission of a spec claim; custody fails numerals that do
+   not trace to the mapped claim or its source quote (a drifted digit
+   previously passed mapping at 0.85 overlap) and quoted strings without
+   a recorded source quote. Aliases are author-declared in the graph, so
+   every accepted synonym is auditable. Also fixed: the tokenizer kept
+   apostrophes through stemming, so "seeder's" never matched "seeder".
+   Every layer was negative-controlled before shipping.
+
 ## Grounding assist (build-trigger check, per design session)
 
 The DeepTutor-style locator-finding assist does NOT yet earn its build.

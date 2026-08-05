@@ -62,9 +62,15 @@ objections and the linchpin always get their own passage and ship with the
 work. Write each passage's prose (voice per `constraints.voice`; the engine
 bans the em dash and the m-word), save it to a temp file, then
 `fill state.json <spec> <file>` and `check state.json <spec> --accept`.
-An unmapped sentence has exactly two futures: cut it from the prose, or
-ground it into the graph FIRST (add the claim + source, re-close, refill).
-Fix named failures; never loop blindly.
+The check runs five layers: bytes (word band, banned strings, pointers),
+extraction (checkable sentences), mapping (no checkable sentence without
+a grounded node; declare `aliases` on a claim rather than lowering the
+threshold), coverage (every spec claim expressed; silent omission fails),
+and custody (numerals must trace to the mapped claim or its source quote;
+quoted strings must match a recorded quote). An unmapped sentence has
+exactly two futures: cut it from the prose, or ground it into the graph
+FIRST (add the claim + source, re-close, refill). Fix named failures;
+never loop blindly.
 
 **5. Render and report.** `render state.json report.html`, then `open` it.
 Chat summary leads with the verdict, then: the linchpin and what holds it,

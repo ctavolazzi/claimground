@@ -73,3 +73,26 @@ Map interactivity and export:
   full-bleed and renders at its natural pixel size (horizontal scroll on
   narrow windows) instead of scaling its type down to fit. Node boxes,
   chips, and type enlarged (12.5px body, 11px ids).
+
+## 0.0.7 (2026-08-04)
+
+The check grows from one semantic layer to five, each owning a failure
+mode the others cannot catch:
+
+1. bytes: word band, banned strings, pointer resolution (unchanged)
+2. extraction: checkable-sentence detection, now including
+   existence-negation patterns ("does not exist", "no such")
+3. mapping: prose to graph, now with author-declared per-claim aliases
+   (recorded in the graph, so every accepted synonym is auditable) and
+   fused-pair matching for one sentence expressing two claims
+4. coverage: graph to prose, NEW: every spec claim must actually be
+   expressed; silent omission is a named failure
+5. custody: NEW: every numeral must trace to the mapped claim's text or
+   its recorded source quote (a drifted digit previously passed mapping
+   at 0.85 overlap); every quoted string must match a recorded quote
+
+Check records carry a layer field. Also fixed: tokenizer kept
+apostrophes through stemming ("seeder's" never matched "seeder"). All
+previously accepted passages re-verified under the five layers; every
+new layer negative-controlled (number drift, silent omission, invented
+quote) before shipping.

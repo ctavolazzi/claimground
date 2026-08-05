@@ -19,8 +19,20 @@ The CLI operates on a state.json file:
     python3 claimground_lib.py argdown   state.json <out.argdown>
     python3 claimground_lib.py map       state.json <out.svg>
 
+The check runs five layers, each owning a failure mode the others cannot
+catch: 1 bytes (word band, banned strings, pointers), 2 extraction (which
+sentences assert something checkable), 3 mapping (no checkable sentence
+without a grounded node; declared aliases and fused-pair matching), 4
+coverage (every spec claim actually expressed; silent omission fails), 5
+custody (numerals must trace to the mapped claim or its source quote;
+quoted strings must match a recorded quote). More layers than this would
+mean judging meaning, which stays human.
+
 State schema (all lists append-only; latest record wins):
-    nodes     [{id, text}]                       claims; nodes[0] is the root
+    nodes     [{id, text, aliases?}]             claims; nodes[0] is the root
+              aliases: author-declared alternate phrasings the mapper may
+              accept; they live in the graph so every accepted synonym is
+              on the record
     edges     [{kind: need|attack, src, dst}]
               [{kind: ground, claim, source, locator, quote?}]
     sources   [{id, ref, url?, bears_on}]
@@ -51,7 +63,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -85,7 +97,7 @@ def _stem(tok):
 
 def tokens(text):
     raw = re.findall(r"[a-z0-9']+", text.lower())
-    return {_stem(t) for t in raw if t not in STOP}
+    return {_stem(t.replace("'", "")) for t in raw if t not in STOP}
 
 
 def words(text):
@@ -313,29 +325,121 @@ def mechanical(state, text, target):
     return recs
 
 
+EXIST_PATTERNS = ("does not exist", "no such", "there is no",
+                  "there are no", "nothing on the market", "cannot be",
+                  "does not pay", "never pays")
+
+
+def claim_tokens(state, cid):
+    """Claim text tokens plus any author-declared aliases. Aliases live
+    in the graph (nodes may carry "aliases": [text]) so every synonym the
+    mapper accepts is itself on the record, not guessed by the machine."""
+    n = node(state, cid)
+    toks = tokens(n["text"])
+    for a in n.get("aliases", []):
+        toks |= tokens(a)
+    return toks
+
+
+def _is_checkable(s):
+    low = s.lower()
+    return (any(ch.isdigit() for ch in s) or '"' in s
+            or bool(tokens(s) & ASSERT_STEMS)
+            or any(p in low for p in EXIST_PATTERNS))
+
+
 def extract(text):
     sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip())
              if s.strip()]
-    return [s for s in sents
-            if any(ch.isdigit() for ch in s) or '"' in s
-            or (tokens(s) & ASSERT_STEMS)]
+    return [s for s in sents if _is_checkable(s)]
+
+
+def analyze(state, text, claim_ids):
+    """Layers 2-4 in one pass. Maps every sentence against the spec's
+    claims: single-claim match at the threshold, then fused-pair match
+    (one sentence expressing two claims: overlaps summing >= 1.0 with
+    each >= 0.35). Checkable sentences that map nowhere are unmapped;
+    claims no sentence maps to are uncovered."""
+    thr = _constraints(state)["map_threshold"]
+    sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip())
+             if s.strip()]
+    checkable = [i for i, s in enumerate(sents) if _is_checkable(s)]
+    ctoks = {cid: claim_tokens(state, cid) for cid in claim_ids}
+    mapping = {cid: [] for cid in claim_ids}
+    unmapped = []
+    for i, s in enumerate(sents):
+        stoks = tokens(s)
+        ov = {cid: (len(ct & stoks) / len(ct) if ct else 0.0)
+              for cid, ct in ctoks.items()}
+        hits = [cid for cid in claim_ids if ov[cid] >= thr]
+        if hits:
+            # fusion complement: a sentence that fully maps one claim can
+            # also express a second one; credit it at >= 0.45 overlap
+            best_ov = max(ov[c] for c in hits)
+            hits += [cid for cid in claim_ids
+                     if cid not in hits and ov[cid] >= 0.45
+                     and ov[cid] + best_ov >= 1.0]
+        if not hits:
+            ranked = sorted(claim_ids, key=lambda c: -ov[c])
+            for a_i in range(len(ranked)):
+                for b_i in range(a_i + 1, len(ranked)):
+                    a_c, b_c = ranked[a_i], ranked[b_i]
+                    if (ov[a_c] + ov[b_c] >= 1.0
+                            and min(ov[a_c], ov[b_c]) >= 0.35):
+                        hits = [a_c, b_c]
+                        break
+                if hits:
+                    break
+        if hits:
+            for cid in hits:
+                mapping[cid].append(i)
+        elif i in checkable:
+            unmapped.append(s)
+    return {"sentences": sents, "checkable": checkable,
+            "mapping": mapping, "unmapped": unmapped}
 
 
 def map_claims(state, found, claim_ids):
-    """Normalized token-overlap MATCH. Returns the unmapped sentences."""
-    thr = _constraints(state)["map_threshold"]
-    unmapped = []
-    for sent in found:
-        st_toks = tokens(sent)
-        hit = False
-        for cid in claim_ids:
-            ct = tokens(node(state, cid)["text"])
-            if ct and len(ct & st_toks) / len(ct) >= thr:
-                hit = True
-                break
-        if not hit:
-            unmapped.append(sent)
-    return unmapped
+    """Back-compat wrapper: the unmapped sentences from analyze()."""
+    return analyze(state, " ".join(found), claim_ids)["unmapped"] \
+        if found else []
+
+
+def _numerals(s):
+    return {t.lstrip("$").rstrip(".,").replace(",", "")
+            for t in re.findall(r"\$?\d[\d,\.]*", s)}
+
+
+def custody_checks(state, an, claim_ids):
+    """Layer 5. Numbers in the prose must appear in the mapped claim's
+    text or one of its recorded source quotes; quoted strings in the
+    prose must substring-match a recorded source quote. Token overlap
+    alone would pass a drifted digit or an invented quotation."""
+    targets = {}
+    all_quotes = []
+    for cid in claim_ids:
+        t = _numerals(node(state, cid)["text"])
+        for e in ground_edges(state, cid):
+            if e.get("quote"):
+                t |= _numerals(e["quote"])
+                all_quotes.append(" ".join(e["quote"].lower().split()))
+        targets[cid] = t
+    num_bad, quote_bad = [], []
+    for i, s in enumerate(an["sentences"]):
+        nums = _numerals(s)
+        if nums:
+            mapped = [cid for cid in claim_ids if i in an["mapping"][cid]]
+            allowed = set().union(*(targets[c] for c in mapped)) \
+                if mapped else set()
+            missing = nums - allowed
+            if missing:
+                num_bad.append("%s (untraceable: %s)"
+                               % (s, ", ".join(sorted(missing))))
+        for q in re.findall(r'"([^"]{4,})"', s):
+            qn = " ".join(q.lower().split())
+            if not any(qn in aq for aq in all_quotes):
+                quote_bad.append(q)
+    return num_bad, quote_bad
 
 
 def verdict(state):
@@ -1275,16 +1379,48 @@ def main(argv):
         sp = next(s for s in state["specs"] if s["id"] == spec_id)
         text = latest_prose(state, _address_of(state, spec_id))
         recs = mechanical(state, text, sp["target"])
-        found = extract(text)
-        unmapped = map_claims(state, found, sp["claims"])
-        ok = all(r["ok"] for r in recs) and not unmapped
+        for r in recs:
+            r["layer"] = 1
+        an = analyze(state, text, sp["claims"])
+        recs.append({"layer": 2, "check": "extract.checkable", "ok": True,
+                     "detail": "%d of %d sentence(s) assert something "
+                     "checkable" % (len(an["checkable"]),
+                                    len(an["sentences"]))})
+        recs.append({"layer": 3, "check": "map.grounded",
+                     "ok": not an["unmapped"],
+                     "detail": ("every checkable sentence maps to the graph"
+                                if not an["unmapped"] else
+                                "%d checkable sentence(s) map to nothing"
+                                % len(an["unmapped"]))})
+        uncovered = [cid for cid in sp["claims"] if not an["mapping"][cid]]
+        recs.append({"layer": 4, "check": "coverage.expressed",
+                     "ok": not uncovered,
+                     "detail": ("every claim in the spec is expressed"
+                                if not uncovered else
+                                "silently omitted: %s"
+                                % ", ".join(uncovered))})
+        num_bad, quote_bad = custody_checks(state, an, sp["claims"])
+        recs.append({"layer": 5, "check": "custody.numbers",
+                     "ok": not num_bad,
+                     "detail": ("every numeral traces to a claim or its "
+                                "source quote" if not num_bad else
+                                "; ".join(num_bad))})
+        recs.append({"layer": 5, "check": "custody.quotes",
+                     "ok": not quote_bad,
+                     "detail": ("no quoted string without a recorded "
+                                "source quote" if not quote_bad else
+                                "invented or drifted: %s"
+                                % "; ".join(quote_bad))})
+        ok = all(r["ok"] for r in recs)
         if ok and "--accept" in rest and spec_id not in state["done"]:
             state["done"].append(spec_id)
             state["trail"].append({"event": "spec_done", "spec": spec_id,
-                                   "checks": len(recs), "extracted": len(found)})
+                                   "layers": 5, "checks": len(recs),
+                                   "extracted": len(an["checkable"])})
             _save(path, state)
-        _out({"ok": ok, "records": recs, "extracted": len(found),
-              "unmapped": unmapped,
+        _out({"ok": ok, "records": recs,
+              "extracted": len(an["checkable"]),
+              "unmapped": an["unmapped"], "uncovered": uncovered,
               "accepted": ok and "--accept" in rest})
     elif cmd == "verdict":
         _out({"verdict": verdict(state)})
