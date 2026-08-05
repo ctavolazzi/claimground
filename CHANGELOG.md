@@ -28,3 +28,22 @@ hole-badge truncation.
 First engine: pure append-only logic layer, CLI (validate / close / plan /
 fill / check / verdict / render), self-contained HTML report with
 copy-page-as-text. Grown from the throwaway terminal prototype.
+
+## 0.0.4 (2026-08-04)
+
+Visualizations:
+
+- Inline SVG argument map in every report: hypothesis at top, needs and
+  attacks layered below, source chips along the bottom, ground edges
+  colored by grade. Every node and chip links into the same #claim / #src
+  custody anchors, so the map is a third entry point into the walk.
+  Status is never color alone: dash patterns, worded labels (ATTACK,
+  LINCHPIN, HOLE), full-text tooltips, and a worded legend. Validated
+  against the dataviz palette checks; the rust/amber adjacency relies on
+  documented secondary encoding (patterns plus labels), per status-palette
+  rules.
+- Argdown export: `argdown state.json out.argdown` serializes the graph
+  for Argdown's VS Code argument-map tooling. Export only; the file
+  header documents the semantic nuance (Argdown '+' is support,
+  claimground's need edge is a necessary condition). Both real runs ship
+  with argument.argdown files.

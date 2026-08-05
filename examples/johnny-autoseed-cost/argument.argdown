@@ -1,0 +1,18 @@
+===
+title: "An autonomous seeding robot plants a quarter-acre plot at lower cost per bed tha"
+subTitle: claimground v0.0.4 export, verdict REFUTED(c6: ungroundable)
+===
+
+/* Export only. Argdown's '+' means support; claimground's
+   need edge means NECESSARY CONDITION. '-' = attack, exact
+   match. Source receipts ride in {braces} metadata. */
+
+[c1]: An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season
+  + [c2]: A garden-bed-scale autonomous seeding robot can be bought today for about $8,000 #leaf {sources: ["s1 @ product pricing section near top of page [LIVE]"]}
+  + [c3]: The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters #leaf {sources: ["s1 @ Nominal machine dimensions section [LIVE]"]}
+  + [c4]: Hired crop labor costs about $17 per hour at the US median #leaf {sources: ["s3 @ Wages & Employment Trends section, 2025 BLS wage data [LIVE]"]}
+  + [c5]: A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes #leaf {sources: ["s4 @ Description section under main product heading [LIVE]"]}
+  + [c6]: Amortized over one season, the robot's cost per bed planted is lower than the hired-labor cost per bed #linchpin #hole #leaf
+  - [a1]: A quarter acre is far too small to amortize any autonomous seeder's capital cost within one season
+    + [a2]: Garden-scale automation costs thousands of dollars while covering only a few beds #leaf {sources: ["s1 @ product pricing section + Nominal machine dimensions section [LIVE]"]}
+    + [a3]: Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares #leaf {sources: ["s5 @ Scaleable with more robots feature section [LIVE]", "s6 @ [PRICE] ALERT section and main product header [LIVE]"]}

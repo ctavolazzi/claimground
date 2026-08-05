@@ -1,4 +1,4 @@
-<!-- claimground report v0.0.3 -->
+<!-- claimground report v0.0.4 -->
 <!doctype html><html lang='en'><head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>claimground: Standing desks and back pain</title>
@@ -81,6 +81,41 @@ a.badge { text-decoration:none; }
 tr:target td { background:rgba(224,123,60,.14); }
 li:target > .claim-line { background:rgba(224,123,60,.14); }
 :target { scroll-margin-top:80px; }
+.mapwrap { overflow-x:auto; margin:8px 0 4px; }
+.mapwrap svg { min-width:720px; width:100%; height:auto;
+  font-family:var(--mono); }
+.map-legend { display:flex; flex-wrap:wrap; gap:14px; margin:2px 0 18px;
+  font:11px var(--mono); color:var(--muted); }
+.map-legend span { display:inline-flex; align-items:center; gap:5px; }
+.lg { display:inline-block; width:18px; height:0;
+  border-top:2px solid var(--line); }
+.lg.atk { border-top-style:dashed; border-top-color:var(--mid); }
+.lg.grd { border-top-style:dotted; border-top-color:var(--ok); }
+.lgbox { display:inline-block; width:11px; height:11px; border-radius:3px;
+  background:var(--card); border:1.5px solid var(--ok); }
+.lgbox.hole { border-color:var(--bad); border-style:dashed; }
+.lgbox.root { border-color:var(--accent); }
+svg .node rect { fill:var(--card); stroke:var(--line); stroke-width:1.3; }
+svg .n-live rect { stroke:var(--ok); }
+svg .n-hole rect { stroke:var(--bad); stroke-dasharray:5 3; }
+svg .n-attack rect { stroke:var(--mid); }
+svg .n-linch rect { stroke-width:2.6; }
+svg .n-root rect { stroke:var(--accent); stroke-width:2; }
+svg text { fill:var(--ink); font-size:10.5px; }
+svg .nid { fill:var(--muted); font-weight:700; font-size:10px; }
+svg .e-need { fill:none; stroke:var(--line); stroke-width:1.5; }
+svg .e-attack { fill:none; stroke:var(--mid); stroke-width:1.8;
+  stroke-dasharray:6 4; }
+svg .e-ground { fill:none; stroke-width:1.2; stroke-dasharray:2 4;
+  opacity:.6; }
+svg .g-live { stroke:var(--ok); }
+svg .g-so { stroke:var(--bad); }
+svg .g-mid { stroke:var(--muted); }
+svg .schip rect { fill:var(--paper); stroke:var(--line); }
+svg .schip.live rect { stroke:var(--ok); }
+svg .schip.walled rect { stroke:var(--mid); }
+svg .schip.so rect { stroke:var(--bad); }
+svg .schip text { fill:var(--muted); font-size:10px; font-weight:700; }
 .badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
 .badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
@@ -124,13 +159,13 @@ a { color:var(--accent); }
 </section>
 <section id='sec-verdict'><h2>Verdict</h2><p class='verdict-line'>SUPPORTED</p><p>The graph closed: every claim is grounded in a live source at a named locator, the objections are grounded and answered, and the linchpin holds.</p></section>
 <section id='sec-work'><h2>The work</h2><article class="passage " id="passage-p1"><button class="pcopy" data-target="pt-p1">copy</button><h3>p1 · main line · accepted</h3><p>Office workers who switch to standing desks report reduced back pain. Prolonged sitting worsens back pain, and the reviewed evidence points the same way.</p><div class="receipts"><b><a href='#claim-c2'>c2</a></b> &larr; <a href='#src-s1'>s1</a> @ p.4, pooled effect [LIVE]</div></article><article class="passage objection" id="passage-p2"><button class="pcopy" data-target="pt-p2">copy</button><h3>p2 · objection · accepted</h3><p>Critics note that standing all day causes its own pain, especially in the feet and knees.</p><div class="receipts"><b><a href='#claim-c4'>c4</a></b> &larr; <a href='#src-s3'>s3</a> @ para 3 [LIVE]</div></article><article class="passage linchpin" id="passage-p3"><button class="pcopy" data-target="pt-p3">copy</button><h3>p3 · linchpin · accepted</h3><p>Alternating sitting and standing reduces spinal load across the workday, which is the linchpin of the case.</p><div class="receipts"><b><a href='#claim-c3'>c3</a></b> &larr; <a href='#src-s2'>s2</a> @ section 2, load table [LIVE]</div></article></section>
-<section id='sec-argument'><h2>The argument</h2><ul class='tree'><li id="claim-c1"><div class="claim-line"><span class="cid">c1</span> Standing desks reduce back pain for office workers</div><ul><li id="claim-c2"><div class="claim-line"><span class="cid">c2</span> Prolonged sitting worsens back pain</div><div class="badge-row"><a class="badge live" href="#src-s1" title="pooled results favored sit-stand interventions">s1 @ p.4, pooled effect: LIVE</a></div></li><li id="claim-c3"><div class="claim-line"><span class="cid">c3</span> Alternating sitting and standing reduces spinal load</div><div class="badge-row"><span class="badge linch">LINCHPIN</span><a class="badge live" href="#src-s2">s2 @ section 2, load table: LIVE</a></div></li><li id="claim-c4"><div class="claim-line"><span class="cid">c4</span> Standing all day causes its own pain</div><div class="badge-row"><span class="badge attack">ATTACK</span><a class="badge live" href="#src-s3">s3 @ para 3: LIVE</a></div></li></ul></li></ul></section>
+<section id='sec-argument'><h2>The argument</h2><div class="mapwrap"><svg viewBox="0 0 566 266" role="img" aria-label="argument map"><path d="M283 66 C 283 88, 99 96, 99 118" class="e-need"/><path d="M283 66 C 283 88, 283 96, 283 118" class="e-need"/><path d="M283 66 C 283 88, 467 96, 467 118" class="e-attack"/><path d="M99 168 C 99 194, 94 190, 94 210" class="e-ground g-live"/><path d="M283 168 C 283 194, 283 190, 283 210" class="e-ground g-live"/><path d="M467 168 C 467 194, 472 190, 472 210" class="e-ground g-live"/><a href="#claim-c1"><g class="node n-root"><title>Standing desks reduce back pain for office workers</title><rect x="198" y="16" width="170" height="50" rx="6"/><text x="206" y="30"><tspan class="nid">c1</tspan></text><text x="206" y="43">Standing desks reduce back</text><text x="206" y="55">pain for office workers</text></g></a><a href="#claim-c2"><g class="node n-live"><title>Prolonged sitting worsens back pain</title><rect x="14" y="118" width="170" height="50" rx="6"/><text x="22" y="132"><tspan class="nid">c2</tspan></text><text x="22" y="145">Prolonged sitting worsens</text><text x="22" y="157">back pain</text></g></a><a href="#claim-c3"><g class="node n-linch n-live"><title>Alternating sitting and standing reduces spinal load</title><rect x="198" y="118" width="170" height="50" rx="6"/><text x="206" y="132"><tspan class="nid">c3 LINCHPIN</tspan></text><text x="206" y="145">Alternating sitting and</text><text x="206" y="157">standing reduces spin...</text></g></a><a href="#claim-c4"><g class="node n-attack n-live"><title>Standing all day causes its own pain</title><rect x="382" y="118" width="170" height="50" rx="6"/><text x="390" y="132"><tspan class="nid">c4 ATTACK</tspan></text><text x="390" y="145">Standing all day causes</text><text x="390" y="157">its own pain</text></g></a><a href="#src-s1"><g class="schip live"><title>Agarwal 2018 systematic review [LIVE]</title><rect x="72" y="220" width="44" height="20" rx="10"/><text x="94" y="234" text-anchor="middle">s1</text></g></a><a href="#src-s2"><g class="schip live"><title>NIOSH posture guidance page [LIVE]</title><rect x="261" y="220" width="44" height="20" rx="10"/><text x="283" y="234" text-anchor="middle">s2</text></g></a><a href="#src-s3"><g class="schip live"><title>ergonomics field report 2015 [LIVE]</title><rect x="450" y="220" width="44" height="20" rx="10"/><text x="472" y="234" text-anchor="middle">s3</text></g></a></svg></div><div class="map-legend"><span><span class="lg"></span>needs</span><span><span class="lg atk"></span>attacks</span><span><span class="lg grd"></span>grounded in</span><span><span class="lgbox root"></span>hypothesis</span><span><span class="lgbox"></span>live-grounded</span><span><span class="lgbox hole"></span>hole</span><span>chips: sources (click anything to walk the chain)</span></div><ul class='tree'><li id="claim-c1"><div class="claim-line"><span class="cid">c1</span> Standing desks reduce back pain for office workers</div><ul><li id="claim-c2"><div class="claim-line"><span class="cid">c2</span> Prolonged sitting worsens back pain</div><div class="badge-row"><a class="badge live" href="#src-s1" title="pooled results favored sit-stand interventions">s1 @ p.4, pooled effect: LIVE</a></div></li><li id="claim-c3"><div class="claim-line"><span class="cid">c3</span> Alternating sitting and standing reduces spinal load</div><div class="badge-row"><span class="badge linch">LINCHPIN</span><a class="badge live" href="#src-s2">s2 @ section 2, load table: LIVE</a></div></li><li id="claim-c4"><div class="claim-line"><span class="cid">c4</span> Standing all day causes its own pain</div><div class="badge-row"><span class="badge attack">ATTACK</span><a class="badge live" href="#src-s3">s3 @ para 3: LIVE</a></div></li></ul></li></ul></section>
 <section id='sec-objections'><h2>Objections</h2><ul class='tree'><li><a class='cid' href='#claim-c4'>c4</a> Standing all day causes its own pain <span class='badge live'>grounded and answered</span> (against <a href='#claim-c1'>c1</a>)</li></ul></section>
 <section id='sec-sources'><h2>Sources</h2><table><tr><th>id</th><th>source</th><th>grade</th><th>attached to</th></tr><tr id='src-s1'><td class='mono'>s1</td><td><a href="https://example.org/agarwal2018">Agarwal 2018 systematic review</a></td><td><span class='badge live'>LIVE</span></td><td><a href='#claim-c2'>c2</a> @ p.4, pooled effect <blockquote>"pooled results favored sit-stand interventions"</blockquote></td></tr><tr id='src-s2'><td class='mono'>s2</td><td>NIOSH posture guidance page</td><td><span class='badge live'>LIVE</span></td><td><a href='#claim-c3'>c3</a> @ section 2, load table</td></tr><tr id='src-s3'><td class='mono'>s3</td><td>ergonomics field report 2015</td><td><span class='badge live'>LIVE</span></td><td><a href='#claim-c4'>c4</a> @ para 3</td></tr></table></section>
 <details id='sec-trail'><summary>Trail (10 events)</summary><div class='trailbox'><div class='tline'><span class='tev'>intake</span>claim=c1</div><div class='tline'><span class='tev'>materialize</span>spec=p1  address=blk1</div><div class='tline'><span class='tev'>materialize</span>spec=p2  address=blk2</div><div class='tline'><span class='tev'>materialize</span>spec=p3  address=blk3</div><div class='tline'><span class='tev'>fill</span>spec=p1  words=24</div><div class='tline'><span class='tev'>spec_done</span>spec=p1  checks=3  extracted=2</div><div class='tline'><span class='tev'>fill</span>spec=p2  words=16</div><div class='tline'><span class='tev'>spec_done</span>spec=p2  checks=3  extracted=1</div><div class='tline'><span class='tev'>fill</span>spec=p3  words=17</div><div class='tline'><span class='tev'>spec_done</span>spec=p3  checks=3  extracted=1</div></div></details>
-<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.3.</footer>
+<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.4.</footer>
 </main>
-<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.3)
+<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.4)
 Hypothesis: Standing desks reduce back pain for office workers
 Verdict: SUPPORTED
 Date: 2026-08-04

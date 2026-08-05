@@ -16,6 +16,7 @@ The CLI operates on a state.json file:
     python3 claimground_lib.py check     state.json <spec_id> [--accept]
     python3 claimground_lib.py verdict   state.json
     python3 claimground_lib.py render    state.json <out.html>
+    python3 claimground_lib.py argdown   state.json <out.argdown>
 
 State schema (all lists append-only; latest record wins):
     nodes     [{id, text}]                       claims; nodes[0] is the root
@@ -49,7 +50,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.3"
+VERSION = "0.0.4"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -478,6 +479,41 @@ a.badge { text-decoration:none; }
 tr:target td { background:rgba(224,123,60,.14); }
 li:target > .claim-line { background:rgba(224,123,60,.14); }
 :target { scroll-margin-top:80px; }
+.mapwrap { overflow-x:auto; margin:8px 0 4px; }
+.mapwrap svg { min-width:720px; width:100%; height:auto;
+  font-family:var(--mono); }
+.map-legend { display:flex; flex-wrap:wrap; gap:14px; margin:2px 0 18px;
+  font:11px var(--mono); color:var(--muted); }
+.map-legend span { display:inline-flex; align-items:center; gap:5px; }
+.lg { display:inline-block; width:18px; height:0;
+  border-top:2px solid var(--line); }
+.lg.atk { border-top-style:dashed; border-top-color:var(--mid); }
+.lg.grd { border-top-style:dotted; border-top-color:var(--ok); }
+.lgbox { display:inline-block; width:11px; height:11px; border-radius:3px;
+  background:var(--card); border:1.5px solid var(--ok); }
+.lgbox.hole { border-color:var(--bad); border-style:dashed; }
+.lgbox.root { border-color:var(--accent); }
+svg .node rect { fill:var(--card); stroke:var(--line); stroke-width:1.3; }
+svg .n-live rect { stroke:var(--ok); }
+svg .n-hole rect { stroke:var(--bad); stroke-dasharray:5 3; }
+svg .n-attack rect { stroke:var(--mid); }
+svg .n-linch rect { stroke-width:2.6; }
+svg .n-root rect { stroke:var(--accent); stroke-width:2; }
+svg text { fill:var(--ink); font-size:10.5px; }
+svg .nid { fill:var(--muted); font-weight:700; font-size:10px; }
+svg .e-need { fill:none; stroke:var(--line); stroke-width:1.5; }
+svg .e-attack { fill:none; stroke:var(--mid); stroke-width:1.8;
+  stroke-dasharray:6 4; }
+svg .e-ground { fill:none; stroke-width:1.2; stroke-dasharray:2 4;
+  opacity:.6; }
+svg .g-live { stroke:var(--ok); }
+svg .g-so { stroke:var(--bad); }
+svg .g-mid { stroke:var(--muted); }
+svg .schip rect { fill:var(--paper); stroke:var(--line); }
+svg .schip.live rect { stroke:var(--ok); }
+svg .schip.walled rect { stroke:var(--mid); }
+svg .schip.so rect { stroke:var(--bad); }
+svg .schip text { fill:var(--muted); font-size:10px; font-weight:700; }
 .badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
 .badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
@@ -597,6 +633,175 @@ def _tree_text(state, cid, indent=0, is_attack=False):
     for a in attackers_of(state, cid):
         lines += _tree_text(state, a, indent + 1, True)
     return lines
+
+
+def _svg_map(state):
+    """Inline SVG argument map. Status is never color alone: holes and
+    attacks carry dash patterns, every node carries its id and text, and
+    the legend below the map names each mark in words. Nodes and source
+    chips link into the same #claim-x / #src-x custody anchors."""
+    if not state["nodes"]:
+        return ""
+    root = state["nodes"][0]["id"]
+    layer, order, queue = {root: 0}, [root], [root]
+    kids_of = {}
+    while queue:
+        c = queue.pop(0)
+        kids = need_children(state, c) + attackers_of(state, c)
+        kids_of[c] = kids
+        for k in kids:
+            if k not in layer:
+                layer[k] = layer[c] + 1
+                order.append(k)
+                queue.append(k)
+    depth = max(layer.values()) + 1
+    layers = [[c for c in order if layer[c] == i] for i in range(depth)]
+    NW, NH, GX, GY = 170, 50, 14, 52
+    width = max(len(l) for l in layers) * (NW + GX) + GX
+    src_y = 16 + depth * (NH + GY)
+    height = src_y + 46
+    pos = {}
+    for i, l in enumerate(layers):
+        total = len(l) * (NW + GX) - GX
+        x0 = (width - total) / 2.0
+        for j, c in enumerate(l):
+            pos[c] = (x0 + j * (NW + GX), 16 + i * (NH + GY))
+    spos = {}
+    ns = max(len(state["sources"]), 1)
+    for j, s in enumerate(state["sources"]):
+        spos[s["id"]] = ((j + 0.5) * width / ns, src_y)
+    parts = []
+    attack_pairs = {(e["src"], e["dst"]) for e in state["edges"]
+                    if e["kind"] == "attack"}
+    for c, kids in kids_of.items():
+        for k in kids:
+            x1, y1 = pos[c][0] + NW / 2, pos[c][1] + NH
+            x2, y2 = pos[k][0] + NW / 2, pos[k][1]
+            cls = "e-attack" if (c, k) in attack_pairs else "e-need"
+            parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
+                         '%.0f %.0f" class="%s"/>'
+                         % (x1, y1, x1, y1 + 22, x2, y2 - 22, x2, y2, cls))
+    for e in state["edges"]:
+        if e["kind"] != "ground":
+            continue
+        if e["claim"] not in pos or e["source"] not in spos:
+            continue
+        x1, y1 = pos[e["claim"]][0] + NW / 2, pos[e["claim"]][1] + NH
+        x2, y2 = spos[e["source"]]
+        g = latest_grade(state, e["source"])
+        gcls = ("g-live" if g == "LIVE" else
+                "g-so" if g == "SAYS_OTHERWISE" else "g-mid")
+        parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
+                     '%.0f %.0f" class="e-ground %s"/>'
+                     % (x1, y1, x1, y1 + 26, x2, y2 - 30, x2, y2 - 10, gcls))
+    holed = {h["claim"] for h in state["holes"]}
+    lp = state["linchpin"][-1] if state["linchpin"] else None
+    attack_nodes = {d for _, d in attack_pairs}
+    for c in order:
+        x, y = pos[c]
+        cls = "node"
+        if c == root:
+            cls += " n-root"
+        if c in attack_nodes:
+            cls += " n-attack"
+        if c == lp:
+            cls += " n-linch"
+        if c in holed:
+            cls += " n-hole"
+        elif _live_grounded(state, c):
+            cls += " n-live"
+        text = node(state, c)["text"]
+        ws, l1 = text.split(), ""
+        while ws and len(l1) + len(ws[0]) + 1 <= 26:
+            l1 += ("" if not l1 else " ") + ws.pop(0)
+        l2 = " ".join(ws)
+        if len(l2) > 24:
+            l2 = l2[:21] + "..."
+        tag = (" ATTACK" if c in attack_nodes else "") + \
+              (" LINCHPIN" if c == lp else "") + \
+              (" HOLE" if c in holed else "")
+        parts.append(
+            '<a href="#claim-%s"><g class="%s"><title>%s</title>'
+            '<rect x="%.0f" y="%.0f" width="%d" height="%d" rx="6"/>'
+            '<text x="%.0f" y="%.0f"><tspan class="nid">%s%s</tspan></text>'
+            '<text x="%.0f" y="%.0f">%s</text><text x="%.0f" y="%.0f">%s'
+            '</text></g></a>'
+            % (_esc(c), cls, _esc(text), x, y, NW, NH, x + 8, y + 14,
+               _esc(c), _esc(tag), x + 8, y + 27, _esc(l1), x + 8, y + 39,
+               _esc(l2)))
+    for s in state["sources"]:
+        x, y = spos[s["id"]]
+        g = (latest_grade(state, s["id"]) or "ungraded").lower()
+        gcls = {"live": "live", "walled": "walled",
+                "says_otherwise": "so"}.get(g, "dead")
+        parts.append(
+            '<a href="#src-%s"><g class="schip %s"><title>%s [%s]</title>'
+            '<rect x="%.0f" y="%.0f" width="44" height="20" rx="10"/>'
+            '<text x="%.0f" y="%.0f" text-anchor="middle">%s</text></g></a>'
+            % (_esc(s["id"]), gcls, _esc(s["ref"]), g.upper(), x - 22, y,
+               x, y + 14, _esc(s["id"])))
+    legend = ('<div class="map-legend">'
+              '<span><span class="lg"></span>needs</span>'
+              '<span><span class="lg atk"></span>attacks</span>'
+              '<span><span class="lg grd"></span>grounded in</span>'
+              '<span><span class="lgbox root"></span>hypothesis</span>'
+              '<span><span class="lgbox"></span>live-grounded</span>'
+              '<span><span class="lgbox hole"></span>hole</span>'
+              '<span>chips: sources (click anything to walk the chain)</span>'
+              '</div>')
+    return ('<div class="mapwrap"><svg viewBox="0 0 %d %d" '
+            'role="img" aria-label="argument map">%s</svg></div>%s'
+            % (width, height, "".join(parts), legend))
+
+
+def to_argdown(state):
+    """Export the graph as Argdown (export only, no round-trip).
+    NUANCE, documented: Argdown's '+' means support; claimground's need
+    edge means NECESSARY CONDITION. '-' matches attack exactly."""
+    root = state["nodes"][0]
+    holed = {h["claim"] for h in state["holes"]}
+    lp = state["linchpin"][-1] if state["linchpin"] else None
+    lines = ["===",
+             "title: %s" % json.dumps(root["text"][:80]),
+             "subTitle: claimground v%s export, verdict %s"
+             % (VERSION, verdict(state)),
+             "===", "",
+             "/* Export only. Argdown's '+' means support; claimground's",
+             "   need edge means NECESSARY CONDITION. '-' = attack, exact",
+             "   match. Source receipts ride in {braces} metadata. */", ""]
+
+    def meta(cid):
+        gs = ground_edges(state, cid)
+        if not gs:
+            return ""
+        rs = ", ".join('"%s @ %s [%s]"'
+                       % (e["source"], e["locator"],
+                          latest_grade(state, e["source"]) or "ungraded")
+                       for e in gs)
+        return " {sources: [%s]}" % rs
+
+    def tags(cid):
+        t = ""
+        if cid == lp:
+            t += " #linchpin"
+        if cid in holed:
+            t += " #hole"
+        if cid in state["leaves"]:
+            t += " #leaf"
+        return t
+
+    def emit(cid, depth, marker):
+        pad = "  " * depth
+        lines.append("%s%s[%s]: %s%s%s"
+                     % (pad, marker, cid, node(state, cid)["text"],
+                        tags(cid), meta(cid)))
+        for k in need_children(state, cid):
+            emit(k, depth + 1, "+ ")
+        for a in attackers_of(state, cid):
+            emit(a, depth + 1, "- ")
+
+    emit(root["id"], 0, "")
+    return "\n".join(lines) + "\n"
 
 
 def render(state, out_path):
@@ -832,7 +1037,8 @@ def render(state, out_path):
         % (_esc(v), _esc(vsent), ledger_html),
         "<section id='sec-work'><h2>The work</h2>%s</section>"
         % "".join(passages_html),
-        "<section id='sec-argument'><h2>The argument</h2>%s</section>" % tree_html,
+        "<section id='sec-argument'><h2>The argument</h2>%s%s</section>"
+        % (_svg_map(state), tree_html),
         "<section id='sec-objections'><h2>Objections</h2><ul class='tree'>%s</ul>"
         "</section>" % "".join(obj_html),
         "<section id='sec-sources'><h2>Sources</h2><table><tr><th>id</th>"
@@ -934,6 +1140,10 @@ def main(argv):
     elif cmd == "render":
         out = render(state, rest[0])
         _out({"written": str(out), "verdict": verdict(state)})
+    elif cmd == "argdown":
+        Path(rest[0]).write_text(to_argdown(state), encoding="utf-8")
+        _out({"written": rest[0], "note": "export only; '+' means support "
+              "in Argdown but necessary-condition in claimground"})
     else:
         print(__doc__)
         return 1
