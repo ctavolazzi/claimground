@@ -17,6 +17,7 @@ The CLI operates on a state.json file:
     python3 claimground_lib.py verdict   state.json
     python3 claimground_lib.py render    state.json <out.html>
     python3 claimground_lib.py argdown   state.json <out.argdown>
+    python3 claimground_lib.py map       state.json <out.svg>
 
 State schema (all lists append-only; latest record wins):
     nodes     [{id, text}]                       claims; nodes[0] is the root
@@ -50,7 +51,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -509,6 +510,10 @@ svg .e-ground { fill:none; stroke-width:1.2; stroke-dasharray:2 4;
 svg .g-live { stroke:var(--ok); }
 svg .g-so { stroke:var(--bad); }
 svg .g-mid { stroke:var(--muted); }
+svg .n-dead rect { stroke:var(--bad); stroke-width:2.6; }
+svg .e-dead { stroke:var(--bad); stroke-width:2.2; opacity:1; }
+.mapwrap a[data-id], .mapwrap path { transition:opacity .15s ease; }
+.mapwrap .dim { opacity:.14; }
 svg .schip rect { fill:var(--paper); stroke:var(--line); }
 svg .schip.live rect { stroke:var(--ok); }
 svg .schip.walled rect { stroke:var(--mid); }
@@ -560,6 +565,53 @@ document.getElementById('copybtn').addEventListener('click', () =>
 document.querySelectorAll('.pcopy').forEach(btn =>
   btn.addEventListener('click', () =>
     copyText(document.getElementById(btn.dataset.target), btn, 'copy')));
+
+// hover layer: light a claim's full chain of custody, dim the rest
+const map = document.querySelector('.mapwrap svg');
+if (map) {
+  const par = {}, kids = {};
+  const edges = Array.from(map.querySelectorAll('path[data-kind]'));
+  const grounds = edges.filter(e => e.dataset.kind === 'ground');
+  edges.forEach(e => {
+    if (e.dataset.kind === 'ground') return;
+    (par[e.dataset.to] = par[e.dataset.to] || []).push(e.dataset.from);
+    (kids[e.dataset.from] = kids[e.dataset.from] || []).push(e.dataset.to);
+  });
+  const items = Array.from(map.querySelectorAll('a[data-id]'));
+  function walk(id, rel, s) {
+    if (s.has(id)) return;
+    s.add(id);
+    (rel[id] || []).forEach(n => walk(n, rel, s));
+  }
+  function litSet(id, isChip) {
+    const s = new Set();
+    if (isChip) {
+      s.add(id);
+      grounds.forEach(g => {
+        if (g.dataset.to === id) walk(g.dataset.from, par, s);
+      });
+    } else {
+      walk(id, par, s);
+      walk(id, kids, s);
+    }
+    grounds.forEach(g => { if (s.has(g.dataset.from)) s.add(g.dataset.to); });
+    return s;
+  }
+  function apply(s) {
+    items.forEach(el => el.classList.toggle('dim', !s.has(el.dataset.id)));
+    edges.forEach(e => e.classList.toggle('dim',
+      !(s.has(e.dataset.from) && s.has(e.dataset.to))));
+  }
+  function clear() {
+    items.forEach(el => el.classList.remove('dim'));
+    edges.forEach(e => e.classList.remove('dim'));
+  }
+  items.forEach(el => {
+    el.addEventListener('mouseenter', () =>
+      apply(litSet(el.dataset.id, el.classList.contains('mapchip'))));
+    el.addEventListener('mouseleave', clear);
+  });
+}
 """
 
 
@@ -635,13 +687,15 @@ def _tree_text(state, cid, indent=0, is_attack=False):
     return lines
 
 
-def _svg_map(state):
-    """Inline SVG argument map. Status is never color alone: holes and
-    attacks carry dash patterns, every node carries its id and text, and
-    the legend below the map names each mark in words. Nodes and source
-    chips link into the same #claim-x / #src-x custody anchors."""
+def _svg_parts(state, links=True):
+    """Shared SVG body builder for the argument map. Status is never
+    color alone: dash patterns, worded labels, tooltips, and the legend
+    carry it too. Returns (width, height, body). With links=True, nodes
+    and chips wrap in <a> anchors into the #claim-x / #src-x custody
+    anchors; either way they carry data-id / data-kind attributes so the
+    hover layer can light a claim's full chain of custody."""
     if not state["nodes"]:
-        return ""
+        return 0, 0, ""
     root = state["nodes"][0]["id"]
     layer, order, queue = {root: 0}, [root], [root]
     kids_of = {}
@@ -670,6 +724,19 @@ def _svg_map(state):
     ns = max(len(state["sources"]), 1)
     for j, s in enumerate(state["sources"]):
         spos[s["id"]] = ((j + 0.5) * width / ns, src_y)
+    # kill path: on a BROKEN graph, the dead claim and its chain up to
+    # the root render loud, so the cause of death reads as geometry
+    res = try_close(state)
+    dead_path, dead_edges = set(), set()
+    if res[0] == "BROKEN":
+        need_par = {e["dst"]: e["src"] for e in state["edges"]
+                    if e["kind"] == "need"}
+        cur = res[1]
+        dead_path.add(cur)
+        while cur in need_par:
+            dead_edges.add((need_par[cur], cur))
+            dead_path.add(need_par[cur])
+            cur = need_par[cur]
     parts = []
     attack_pairs = {(e["src"], e["dst"]) for e in state["edges"]
                     if e["kind"] == "attack"}
@@ -677,10 +744,18 @@ def _svg_map(state):
         for k in kids:
             x1, y1 = pos[c][0] + NW / 2, pos[c][1] + NH
             x2, y2 = pos[k][0] + NW / 2, pos[k][1]
-            cls = "e-attack" if (c, k) in attack_pairs else "e-need"
+            atk = (c, k) in attack_pairs
+            cls = "e-attack" if atk else "e-need"
+            if (c, k) in dead_edges:
+                cls += " e-dead"
+            rel = "is attacked by" if atk else "needs"
             parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
-                         '%.0f %.0f" class="%s"/>'
-                         % (x1, y1, x1, y1 + 22, x2, y2 - 22, x2, y2, cls))
+                         '%.0f %.0f" class="%s" data-kind="%s" '
+                         'data-from="%s" data-to="%s">'
+                         '<title>%s %s %s</title></path>'
+                         % (x1, y1, x1, y1 + 22, x2, y2 - 22, x2, y2, cls,
+                            "attack" if atk else "need", _esc(c), _esc(k),
+                            _esc(c), rel, _esc(k)))
     for e in state["edges"]:
         if e["kind"] != "ground":
             continue
@@ -691,9 +766,15 @@ def _svg_map(state):
         g = latest_grade(state, e["source"])
         gcls = ("g-live" if g == "LIVE" else
                 "g-so" if g == "SAYS_OTHERWISE" else "g-mid")
+        tip = "%s grounds %s @ %s [%s]" % (e["source"], e["claim"],
+                                           e["locator"], g or "ungraded")
+        if e.get("quote"):
+            tip += ' :: "%s"' % e["quote"]
         parts.append('<path d="M%.0f %.0f C %.0f %.0f, %.0f %.0f, '
-                     '%.0f %.0f" class="e-ground %s"/>'
-                     % (x1, y1, x1, y1 + 26, x2, y2 - 30, x2, y2 - 10, gcls))
+                     '%.0f %.0f" class="e-ground %s" data-kind="ground" '
+                     'data-from="%s" data-to="%s"><title>%s</title></path>'
+                     % (x1, y1, x1, y1 + 26, x2, y2 - 30, x2, y2 - 10, gcls,
+                        _esc(e["claim"]), _esc(e["source"]), _esc(tip)))
     holed = {h["claim"] for h in state["holes"]}
     lp = state["linchpin"][-1] if state["linchpin"] else None
     attack_nodes = {d for _, d in attack_pairs}
@@ -719,27 +800,46 @@ def _svg_map(state):
             l2 = l2[:21] + "..."
         tag = (" ATTACK" if c in attack_nodes else "") + \
               (" LINCHPIN" if c == lp else "") + \
-              (" HOLE" if c in holed else "")
-        parts.append(
-            '<a href="#claim-%s"><g class="%s"><title>%s</title>'
-            '<rect x="%.0f" y="%.0f" width="%d" height="%d" rx="6"/>'
-            '<text x="%.0f" y="%.0f"><tspan class="nid">%s%s</tspan></text>'
-            '<text x="%.0f" y="%.0f">%s</text><text x="%.0f" y="%.0f">%s'
-            '</text></g></a>'
-            % (_esc(c), cls, _esc(text), x, y, NW, NH, x + 8, y + 14,
-               _esc(c), _esc(tag), x + 8, y + 27, _esc(l1), x + 8, y + 39,
-               _esc(l2)))
+              (" HOLE" if c in holed else "") + \
+              (" DEAD" if c in dead_path and c not in holed else "")
+        if c in dead_path:
+            cls += " n-dead"
+        body = ('<g class="%s"><title>%s</title>'
+                '<rect x="%.0f" y="%.0f" width="%d" height="%d" rx="6"/>'
+                '<text x="%.0f" y="%.0f"><tspan class="nid">%s%s</tspan>'
+                '</text><text x="%.0f" y="%.0f">%s</text>'
+                '<text x="%.0f" y="%.0f">%s</text></g>'
+                % (cls, _esc(text), x, y, NW, NH, x + 8, y + 14,
+                   _esc(c), _esc(tag), x + 8, y + 27, _esc(l1), x + 8,
+                   y + 39, _esc(l2)))
+        if links:
+            parts.append('<a href="#claim-%s" class="mapnode" data-id="%s">'
+                         '%s</a>' % (_esc(c), _esc(c), body))
+        else:
+            parts.append(body)
     for s in state["sources"]:
         x, y = spos[s["id"]]
         g = (latest_grade(state, s["id"]) or "ungraded").lower()
         gcls = {"live": "live", "walled": "walled",
                 "says_otherwise": "so"}.get(g, "dead")
-        parts.append(
-            '<a href="#src-%s"><g class="schip %s"><title>%s [%s]</title>'
-            '<rect x="%.0f" y="%.0f" width="44" height="20" rx="10"/>'
-            '<text x="%.0f" y="%.0f" text-anchor="middle">%s</text></g></a>'
-            % (_esc(s["id"]), gcls, _esc(s["ref"]), g.upper(), x - 22, y,
-               x, y + 14, _esc(s["id"])))
+        body = ('<g class="schip %s"><title>%s [%s]</title>'
+                '<rect x="%.0f" y="%.0f" width="44" height="20" rx="10"/>'
+                '<text x="%.0f" y="%.0f" text-anchor="middle">%s</text></g>'
+                % (gcls, _esc(s["ref"]), g.upper(), x - 22, y, x, y + 14,
+                   _esc(s["id"])))
+        if links:
+            parts.append('<a href="#src-%s" class="mapchip" data-id="%s">'
+                         '%s</a>' % (_esc(s["id"]), _esc(s["id"]), body))
+        else:
+            parts.append(body)
+    return width, height, "".join(parts)
+
+
+def _svg_map(state):
+    """The in-report argument map: shared parts + worded legend."""
+    width, height, body = _svg_parts(state, links=True)
+    if not body:
+        return ""
     legend = ('<div class="map-legend">'
               '<span><span class="lg"></span>needs</span>'
               '<span><span class="lg atk"></span>attacks</span>'
@@ -747,11 +847,58 @@ def _svg_map(state):
               '<span><span class="lgbox root"></span>hypothesis</span>'
               '<span><span class="lgbox"></span>live-grounded</span>'
               '<span><span class="lgbox hole"></span>hole</span>'
-              '<span>chips: sources (click anything to walk the chain)</span>'
-              '</div>')
+              '<span>chips: sources (hover to light a chain, click to '
+              'walk it)</span></div>')
     return ('<div class="mapwrap"><svg viewBox="0 0 %d %d" '
             'role="img" aria-label="argument map">%s</svg></div>%s'
-            % (width, height, "".join(parts), legend))
+            % (width, height, body, legend))
+
+
+# Standalone export palette: FogSift-family status colors re-stepped for
+# a warm paper surface (all >= 4.5:1 on #faf8f3), since the report's CSS
+# variables do not travel with a bare .svg file.
+_MAP_LIGHT_CSS = """
+ text { fill:#3a312b; font-size:10.5px; }
+ .nid { fill:#7a6b5d; font-weight:700; font-size:10px; }
+ .node rect { fill:#ffffff; stroke:#b8a88a; stroke-width:1.3; }
+ .n-live rect { stroke:#0f766e; }
+ .n-hole rect { stroke:#bd2436; stroke-dasharray:5 3; }
+ .n-attack rect { stroke:#b45309; }
+ .n-linch rect { stroke-width:2.6; }
+ .n-root rect { stroke:#c2410c; stroke-width:2; }
+ .n-dead rect { stroke:#bd2436; stroke-width:2.6; }
+ .e-need { fill:none; stroke:#b8a88a; stroke-width:1.5; }
+ .e-attack { fill:none; stroke:#b45309; stroke-width:1.8;
+   stroke-dasharray:6 4; }
+ .e-dead { stroke:#bd2436; stroke-width:2.2; }
+ .e-ground { fill:none; stroke-width:1.2; stroke-dasharray:2 4;
+   opacity:.7; }
+ .g-live { stroke:#0f766e; }
+ .g-so { stroke:#bd2436; }
+ .g-mid { stroke:#7a6b5d; }
+ .schip rect { fill:#faf8f3; stroke:#b8a88a; }
+ .schip.live rect { stroke:#0f766e; }
+ .schip.walled rect { stroke:#b45309; }
+ .schip.so rect { stroke:#bd2436; }
+ .schip text { fill:#7a6b5d; font-size:10px; font-weight:700; }
+ .maplegend { fill:#7a6b5d; font-size:11px; }
+"""
+
+
+def map_svg_standalone(state):
+    """Print-ready standalone map: light palette, no anchors, legend as
+    an in-SVG text row. Drops into a document or slide as-is."""
+    width, height, body = _svg_parts(state, links=False)
+    if not body:
+        return ""
+    legend = ('<text x="12" y="%d" class="maplegend">solid: needs / '
+              'dashed: attacks / dotted: grounded in / chips: sources / '
+              'labels: ATTACK, LINCHPIN, HOLE, DEAD</text>' % (height + 16))
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
+            'font-family="ui-monospace,Menlo,Consolas,monospace">'
+            '<style>%s</style><rect width="100%%" height="100%%" '
+            'fill="#faf8f3"/>%s%s</svg>'
+            % (width, height + 30, _MAP_LIGHT_CSS, body, legend))
 
 
 def to_argdown(state):
@@ -1144,6 +1291,10 @@ def main(argv):
         Path(rest[0]).write_text(to_argdown(state), encoding="utf-8")
         _out({"written": rest[0], "note": "export only; '+' means support "
               "in Argdown but necessary-condition in claimground"})
+    elif cmd == "map":
+        Path(rest[0]).write_text(map_svg_standalone(state), encoding="utf-8")
+        _out({"written": rest[0], "note": "standalone light-palette SVG, "
+              "print-ready"})
     else:
         print(__doc__)
         return 1

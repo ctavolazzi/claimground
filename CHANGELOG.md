@@ -47,3 +47,22 @@ Visualizations:
   header documents the semantic nuance (Argdown '+' is support,
   claimground's need edge is a necessary condition). Both real runs ship
   with argument.argdown files.
+
+## 0.0.5 (2026-08-04)
+
+Map interactivity and export:
+
+- Hover a node: its full chain of custody lights up (ancestors to the
+  hypothesis, descendants, ground edges, source chips) and everything
+  else dims. Hover a source chip: every claim it testifies for lights,
+  which makes dual-testimony sources visible at a glance. Verified in
+  headless Chrome by dispatching a synthetic mouseenter and
+  screenshotting the dimmed state.
+- Kill-path emphasis: on a BROKEN graph the dead claim and its chain up
+  to the root render in rust with a DEAD label, so a REFUTED map reads
+  as "here is the wound" at a glance.
+- Ground edges carry tooltips: source, claim, locator, grade, and the
+  exact quote.
+- New `map` CLI command: standalone print-ready map.svg on a light warm
+  paper palette (status colors re-stepped to >= 4.5:1 contrast), no
+  anchors, in-SVG worded legend. Both real runs ship with map.svg.
