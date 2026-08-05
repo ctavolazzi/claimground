@@ -32,6 +32,22 @@ with            try_close: CLOSED | OPEN | BROKEN
 Verdicts: `SUPPORTED | REFUTED(cause) | UNDECIDED`. The verdict is settled
 by the graph, never by the prose.
 
+## A real run
+
+[examples/johnny-autoseed-cost/](examples/johnny-autoseed-cost/) is the
+first run on a real claim with real research: *"An autonomous seeding
+robot plants a quarter-acre plot at lower cost per bed than hired labor
+within one season."* Verdict: **REFUTED(c6: ungroundable)**, reached
+before any prose existed. The linchpin (robot cost per bed beats labor
+cost per bed) could not be grounded, and the grounded numbers imply its
+opposite by roughly two orders of magnitude: $7,995 of robot covering
+about 4 beds versus labor at $17.15/hr median. The run directory carries
+the full chain of custody: `state.json` (graph, dated grades including a
+WALLED grade for the robot-blocked BLS page, work-across trail),
+`report.html` ([live page](https://raw.githack.com/ctavolazzi/claimground/main/examples/johnny-autoseed-cost/report.html)),
+and `cache/` with the raw HTML of every source read, quotes verified
+present in the cached bytes.
+
 ## What a run looks like
 
 Both reports below come from the same worked example (the standing-desk

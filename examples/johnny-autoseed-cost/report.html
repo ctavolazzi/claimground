@@ -1,0 +1,211 @@
+<!-- claimground report v0.0.2 -->
+<!doctype html><html lang='en'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>claimground: Autonomous seeding robot vs hired labor, quarter-acre scale</title>
+<style>
+:root { --ink:#26211c; --paper:#faf8f3; --card:#ffffff; --line:#d8cdb8;
+  --muted:#7a6b5d; --accent:#e07b3c; --ok:#0d9488; --bad:#c2410c;
+  --mid:#d97706; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e8e2d6; --paper:#191613; --card:#211d19; --line:#3c352c;
+    --muted:#a2937f; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink);
+  font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+header.top { position:sticky; top:0; display:flex; align-items:center;
+  gap:12px; padding:10px 20px; background:var(--paper);
+  border-bottom:2px solid var(--line); z-index:5; }
+.brand { font-family:var(--mono); font-weight:700; letter-spacing:.12em;
+  font-size:13px; }
+.chip { font-family:var(--mono); font-size:12px; font-weight:700;
+  padding:3px 10px; border-radius:999px; color:#fff; }
+.chip.SUPPORTED { background:var(--ok); }
+.chip.REFUTED { background:var(--bad); }
+.chip.UNDECIDED { background:var(--mid); }
+#copybtn { margin-left:auto; font:600 13px system-ui; padding:6px 14px;
+  border:2px solid var(--ink); background:var(--card); color:var(--ink);
+  border-radius:6px; cursor:pointer; }
+#copybtn:hover { border-color:var(--accent); color:var(--accent); }
+main { max-width:76ch; margin:0 auto; padding:28px 20px 80px; }
+h1 { font-size:26px; line-height:1.3; margin:8px 0 4px; }
+h2 { font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); border-bottom:1px solid var(--line);
+  padding-bottom:4px; margin:36px 0 14px; }
+h3 { font-size:14px; font-family:var(--mono); margin:18px 0 6px; }
+.meta { color:var(--muted); font-size:13px; font-family:var(--mono); }
+.verdict-line { font-size:18px; font-weight:600; }
+article.passage { background:var(--card); border:1px solid var(--line);
+  border-left:4px solid var(--accent); border-radius:6px;
+  padding:4px 16px 10px; margin:12px 0; }
+article.passage.objection { border-left-color:var(--mid); }
+article.passage.linchpin { border-left-color:var(--ok); }
+ul.tree { list-style:none; padding-left:0; }
+ul.tree ul { list-style:none; padding-left:22px;
+  border-left:1px solid var(--line); margin:4px 0 4px 6px; }
+ul.tree li { margin:7px 0; }
+.cid { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.badge { font-family:var(--mono); font-size:11px; padding:1px 7px;
+  border-radius:4px; border:1px solid var(--line); margin-left:6px;
+  white-space:nowrap; }
+.badge.live { color:var(--ok); border-color:var(--ok); }
+.badge.dead { color:var(--muted); }
+.badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
+.badge.walled { color:var(--mid); border-color:var(--mid); }
+.receipts { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
+  font:11.5px/1.7 var(--mono); color:var(--muted); }
+.receipts b { color:var(--ink); font-weight:600; }
+.gdate { font:11px var(--mono); color:var(--muted); display:block; }
+.badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
+.badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; }
+th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+  vertical-align:top; }
+th { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); }
+td.mono, .mono { font-family:var(--mono); font-size:12.5px; }
+blockquote { margin:6px 0 0; padding:2px 12px; border-left:3px solid var(--line);
+  color:var(--muted); font-size:13.5px; font-style:italic; }
+details { margin:28px 0; }
+summary { cursor:pointer; font-weight:600; }
+pre.trail { background:var(--card); border:1px solid var(--line);
+  border-radius:6px; padding:12px; font:12px/1.7 var(--mono);
+  overflow-x:auto; }
+.ledger { background:var(--card); border:2px solid var(--bad);
+  border-radius:6px; padding:10px 16px; margin:14px 0; }
+footer { margin-top:48px; color:var(--muted); font-size:12.5px;
+  border-top:1px solid var(--line); padding-top:12px; }
+#copytext { position:absolute; left:-9999px; top:0; }
+a { color:var(--accent); }
+@media print { header.top button { display:none; } }
+</style></head><body>
+<header class='top'><div class='brand'>CLAIMGROUND</div>
+<div class='chip REFUTED'>REFUTED(c6: ungroundable)</div>
+<button id='copybtn'>copy page as text</button></header>
+<main>
+<section><p class='meta'>hypothesis</p><h1>An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season</h1>
+<p class='meta'>2026-08-04 · 9 claims · 6 sources · 29 trail events</p></section>
+<section><h2>Verdict</h2><p class='verdict-line'>REFUTED(c6: ungroundable)</p><p>The graph broke before any prose was written. Refutation here costs research, never a manuscript.</p><div class="ledger"><strong>Dead claim:</strong> <span class="cid">c6</span> Amortized over one season, the robot&#x27;s cost per bed planted is lower than the hired-labor cost per bed<br><strong>Cause:</strong> ungroundable<br>declared hole: No source supports the comparison, and the grounded numbers imply its opposite by roughly two orders of magnitude. The only garden-bed-scale robot on the market costs $7,995 (s1, pricing section) and covers 18 square meters, about 4 standard 30-inch beds (s1, dimensions section), so one-season amortization is roughly $2,000 per bed before installation and upkeep. Hired labor at the $17.15/hr US median (s3) costs under $20 per bed even at a deliberately generous full hour per bed, and a push seeder finishes a bed in one or two walking passes (s4), so the real figure is lower. Field-scale robots amortize worse here: $60,000 (s6) against a 20-to-30-hectare design target (s5) is 80 to 120 times the plot in question.</div></section>
+<section><h2>The work</h2><p>No prose. The run ended in phase 1, before composition.</p></section>
+<section><h2>The argument</h2><ul class='tree'><li><span class="cid">c1</span> An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season<ul><li><span class="cid">c2</span> A garden-bed-scale autonomous seeding robot can be bought today for about $8,000<span class="badge live">s1 @ product pricing section near top of page: LIVE</span></li><li><span class="cid">c3</span> The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters<span class="badge live">s1 @ Nominal machine dimensions section: LIVE</span></li><li><span class="cid">c4</span> Hired crop labor costs about $17 per hour at the US median<span class="badge live">s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data: LIVE</span></li><li><span class="cid">c5</span> A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes<span class="badge live">s4 @ Description section under main product heading: LIVE</span></li><li><span class="cid">c6</span> Amortized over one season, the robot&#x27;s cost per bed planted is lower than the hired-labor cost per bed<span class="badge linch">LINCHPIN</span><span class="badge hole">HOLE: No source supports the comparison, and the grounded numbe...</span></li><li><span class="cid">a1</span> A quarter acre is far too small to amortize any autonomous seeder&#x27;s capital cost within one season<span class="badge attack">ATTACK</span><ul><li><span class="cid">a2</span> Garden-scale automation costs thousands of dollars while covering only a few beds<span class="badge live">s1 @ product pricing section + Nominal machine dimensions section: LIVE</span></li><li><span class="cid">a3</span> Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares<span class="badge live">s5 @ Scaleable with more robots feature section: LIVE</span><span class="badge live">s6 @ [PRICE] ALERT section and main product header: LIVE</span></li></ul></li></ul></li></ul></section>
+<section><h2>Objections</h2><ul class='tree'><li><span class='cid'>a1</span> A quarter acre is far too small to amortize any autonomous seeder&#x27;s capital cost within one season <span class='badge so'>STANDS, unanswered</span> (against c1)</li></ul></section>
+<section><h2>Sources</h2><table><tr><th>id</th><th>source</th><th>grade</th><th>attached to</th></tr><tr><td class='mono'>s1</td><td><a href="https://farm.bot/products/farmbot-genesis-xl-v1-8">FarmBot Genesis XL v1.8 product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c2 @ product pricing section near top of page <blockquote>"$7,995.00"</blockquote><br>c3 @ Nominal machine dimensions section <blockquote>"Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)"</blockquote><br>a2 @ product pricing section + Nominal machine dimensions section <blockquote>"$7,995.00 ... Width: Up to 3m (Genesis XL); Length: Up to 6m (Genesis XL)"</blockquote></td></tr><tr><td class='mono'>s2</td><td><a href="https://www.bls.gov/oes/current/oes452092.htm">BLS OES 45-2092 Farmworkers and Laborers, Crop (current)</a></td><td><span class='badge walled'>WALLED</span><span class='gdate'>graded 2026-08-04</span><span class='gdate'>HTTP 403 via WebFetch and via curl with browser UA; refusal, not a dead citation; 403 page archived in cache</span></td><td>not attached</td></tr><tr><td class='mono'>s3</td><td><a href="https://www.onetonline.org/link/summary/45-2092.00">O*NET OnLine 45-2092.00 summary (republishes BLS wage data)</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c4 @ Wages &amp; Employment Trends section, 2025 BLS wage data <blockquote>"$17.15 hourly, $35,660 annual"</blockquote></td></tr><tr><td class='mono'>s4</td><td><a href="https://paperpot.co/product/jang-jp5-seeder/">Paperpot Co, Jang JP5 seeder product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>c5 @ Description section under main product heading <blockquote>"With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed."</blockquote></td></tr><tr><td class='mono'>s5</td><td><a href="https://farmdroid.com/products/farmdroid-fd20/">FarmDroid FD20 product page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>a3 @ Scaleable with more robots feature section <blockquote>"We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown"</blockquote></td></tr><tr><td class='mono'>s6</td><td><a href="https://robotomated.com/explore/agricultural/farmdroid-fd20">Robotomated FD20 review page</a></td><td><span class='badge live'>LIVE</span><span class='gdate'>graded 2026-08-04</span></td><td>a3 @ [PRICE] ALERT section and main product header <blockquote>"$60,000"</blockquote></td></tr></table></section>
+<details><summary>Trail (29 events)</summary><pre class='trail'>event=intake  claim=c1  date=2026-08-04
+event=source  source=s1  ref=farm.bot Genesis XL v1.8
+event=source  source=s2  ref=BLS OES 45-2092
+event=source  source=s3  ref=O*NET 45-2092.00
+event=source  source=s4  ref=Paperpot Jang JP5
+event=source  source=s5  ref=FarmDroid FD20
+event=source  source=s6  ref=Robotomated FD20
+event=need  parent=c1  claim=c2
+event=need  parent=c1  claim=c3
+event=need  parent=c1  claim=c4
+event=need  parent=c1  claim=c5
+event=need  parent=c1  claim=c6
+event=attack  parent=c1  claim=a1
+event=need  parent=a1  claim=a2
+event=need  parent=a1  claim=a3
+event=linchpin  claim=c6
+event=grade  source=s2  grade=WALLED  date=2026-08-04  note=BLS blocked; wage grounded via s3 instead; never laundered into support
+event=attach  claim=c2  source=s1  locator=pricing section  date=2026-08-04
+event=attach  claim=c3  source=s1  locator=dimensions section  date=2026-08-04
+event=work_across  source=s1  touched=a2  relation=support  note=ACH rule: the vendor&#x27;s own price and coverage testify FOR the attack; snippet had claimed $4,395 (v1.7); fetched artifact says $7,995 (v1.8), snippet-vs-artifact lesson confirmed
+event=attach  claim=c4  source=s3  locator=Wages &amp; Employment Trends  date=2026-08-04
+event=work_across  source=s3  touched=a1  relation=support  note=the LOW median wage is what makes one-season amortization impossible; wage evidence cuts against the root it was fetched to support
+event=attach  claim=c5  source=s4  locator=Description section  date=2026-08-04
+event=work_across  source=s4  touched=a1  relation=support  note=fast manual seeding lowers the labor baseline the robot must beat
+event=attach  claim=a3  source=s5  locator=Scaleable section  date=2026-08-04
+event=attach  claim=a3  source=s6  locator=[PRICE] ALERT section  date=2026-08-04
+event=hole  claim=c6  date=2026-08-04  why=no source supports the comparison; grounded numbers imply roughly 100x the other way
+event=note  text=judgment count: 2-4 pointed judgments per leaf (does page state it / where / grade / who else does it touch); c5 cost 5 fetches across 4 candidate sources before a groundable sentence appeared
+event=verdict  verdict=REFUTED  claim=c6  cause=ungroundable</pre></details>
+<footer>claim graph first, prose second. The verdict was settled by the graph before any prose existed; the prose answers to it. Generated by <a href='https://github.com/ctavolazzi/claimground'>claimground</a> v0.0.2.</footer>
+</main>
+<textarea id='copytext' readonly>CLAIMGROUND REPORT  (claimground v0.0.2)
+Hypothesis: An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season
+Verdict: REFUTED(c6: ungroundable)
+Date: 2026-08-04
+
+== VERDICT ==
+The graph broke before any prose was written. Refutation here costs research, never a manuscript.
+DEAD CLAIM: c6 Amortized over one season, the robot&#x27;s cost per bed planted is lower than the hired-labor cost per bed
+CAUSE: ungroundable
+declared hole: No source supports the comparison, and the grounded numbers imply its opposite by roughly two orders of magnitude. The only garden-bed-scale robot on the market costs $7,995 (s1, pricing section) and covers 18 square meters, about 4 standard 30-inch beds (s1, dimensions section), so one-season amortization is roughly $2,000 per bed before installation and upkeep. Hired labor at the $17.15/hr US median (s3) costs under $20 per bed even at a deliberately generous full hour per bed, and a push seeder finishes a bed in one or two walking passes (s4), so the real figure is lower. Field-scale robots amortize worse here: $60,000 (s6) against a 20-to-30-hectare design target (s5) is 80 to 120 times the plot in question.
+
+== THE WORK ==
+No prose. The run ended in phase 1, before composition.
+
+== THE ARGUMENT ==
+- c1 An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season
+  - c2 A garden-bed-scale autonomous seeding robot can be bought today for about $8,000  [s1 @ product pricing section near top of page: LIVE]
+  - c3 The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters  [s1 @ Nominal machine dimensions section: LIVE]
+  - c4 Hired crop labor costs about $17 per hour at the US median  [s3 @ Wages &amp; Employment Trends section, 2025 BLS wage data: LIVE]
+  - c5 A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes  [s4 @ Description section under main product heading: LIVE]
+  - c6 Amortized over one season, the robot&#x27;s cost per bed planted is lower than the hired-labor cost per bed  [LINCHPIN; HOLE: No source supports the comparison, and the grounded numbers imply its opposite by roughly two orders of magnitude. The only garden-bed-scale robot on the market costs $7,995 (s1, pricing section) and covers 18 square meters, about 4 standard 30-inch beds (s1, dimensions section), so one-season amortization is roughly $2,000 per bed before installation and upkeep. Hired labor at the $17.15/hr US median (s3) costs under $20 per bed even at a deliberately generous full hour per bed, and a push seeder finishes a bed in one or two walking passes (s4), so the real figure is lower. Field-scale robots amortize worse here: $60,000 (s6) against a 20-to-30-hectare design target (s5) is 80 to 120 times the plot in question.]
+  - a1 A quarter acre is far too small to amortize any autonomous seeder&#x27;s capital cost within one season  [ATTACK]
+    - a2 Garden-scale automation costs thousands of dollars while covering only a few beds  [s1 @ product pricing section + Nominal machine dimensions section: LIVE]
+    - a3 Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares  [s5 @ Scaleable with more robots feature section: LIVE; s6 @ [PRICE] ALERT section and main product header: LIVE]
+
+== OBJECTIONS ==
+- a1 A quarter acre is far too small to amortize any autonomous seeder&#x27;s capital cost within one season [STANDS, unanswered] (against c1)
+
+== SOURCES ==
+s1. FarmBot Genesis XL v1.8 product page &lt;https://farm.bot/products/farmbot-genesis-xl-v1-8&gt; [LIVE, graded 2026-08-04]
+    c2 @ product pricing section near top of page :: &quot;$7,995.00&quot;
+    c3 @ Nominal machine dimensions section :: &quot;Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)&quot;
+    a2 @ product pricing section + Nominal machine dimensions section :: &quot;$7,995.00 ... Width: Up to 3m (Genesis XL); Length: Up to 6m (Genesis XL)&quot;
+s2. BLS OES 45-2092 Farmworkers and Laborers, Crop (current) &lt;https://www.bls.gov/oes/current/oes452092.htm&gt; [WALLED, graded 2026-08-04; HTTP 403 via WebFetch and via curl with browser UA; refusal, not a dead citation; 403 page archived in cache]
+s3. O*NET OnLine 45-2092.00 summary (republishes BLS wage data) &lt;https://www.onetonline.org/link/summary/45-2092.00&gt; [LIVE, graded 2026-08-04]
+    c4 @ Wages &amp; Employment Trends section, 2025 BLS wage data :: &quot;$17.15 hourly, $35,660 annual&quot;
+s4. Paperpot Co, Jang JP5 seeder product page &lt;https://paperpot.co/product/jang-jp5-seeder/&gt; [LIVE, graded 2026-08-04]
+    c5 @ Description section under main product heading :: &quot;With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed.&quot;
+s5. FarmDroid FD20 product page &lt;https://farmdroid.com/products/farmdroid-fd20/&gt; [LIVE, graded 2026-08-04]
+    a3 @ Scaleable with more robots feature section :: &quot;We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown&quot;
+s6. Robotomated FD20 review page &lt;https://robotomated.com/explore/agricultural/farmdroid-fd20&gt; [LIVE, graded 2026-08-04]
+    a3 @ [PRICE] ALERT section and main product header :: &quot;$60,000&quot;
+
+== TRAIL ==
+event=intake  claim=c1  date=2026-08-04
+event=source  source=s1  ref=farm.bot Genesis XL v1.8
+event=source  source=s2  ref=BLS OES 45-2092
+event=source  source=s3  ref=O*NET 45-2092.00
+event=source  source=s4  ref=Paperpot Jang JP5
+event=source  source=s5  ref=FarmDroid FD20
+event=source  source=s6  ref=Robotomated FD20
+event=need  parent=c1  claim=c2
+event=need  parent=c1  claim=c3
+event=need  parent=c1  claim=c4
+event=need  parent=c1  claim=c5
+event=need  parent=c1  claim=c6
+event=attack  parent=c1  claim=a1
+event=need  parent=a1  claim=a2
+event=need  parent=a1  claim=a3
+event=linchpin  claim=c6
+event=grade  source=s2  grade=WALLED  date=2026-08-04  note=BLS blocked; wage grounded via s3 instead; never laundered into support
+event=attach  claim=c2  source=s1  locator=pricing section  date=2026-08-04
+event=attach  claim=c3  source=s1  locator=dimensions section  date=2026-08-04
+event=work_across  source=s1  touched=a2  relation=support  note=ACH rule: the vendor&#x27;s own price and coverage testify FOR the attack; snippet had claimed $4,395 (v1.7); fetched artifact says $7,995 (v1.8), snippet-vs-artifact lesson confirmed
+event=attach  claim=c4  source=s3  locator=Wages &amp; Employment Trends  date=2026-08-04
+event=work_across  source=s3  touched=a1  relation=support  note=the LOW median wage is what makes one-season amortization impossible; wage evidence cuts against the root it was fetched to support
+event=attach  claim=c5  source=s4  locator=Description section  date=2026-08-04
+event=work_across  source=s4  touched=a1  relation=support  note=fast manual seeding lowers the labor baseline the robot must beat
+event=attach  claim=a3  source=s5  locator=Scaleable section  date=2026-08-04
+event=attach  claim=a3  source=s6  locator=[PRICE] ALERT section  date=2026-08-04
+event=hole  claim=c6  date=2026-08-04  why=no source supports the comparison; grounded numbers imply roughly 100x the other way
+event=note  text=judgment count: 2-4 pointed judgments per leaf (does page state it / where / grade / who else does it touch); c5 cost 5 fetches across 4 candidate sources before a groundable sentence appeared
+event=verdict  verdict=REFUTED  claim=c6  cause=ungroundable
+
+Method: claim graph first, prose second. Every claim above traces to a source at a named locator or is flagged as a hole. github.com/ctavolazzi/claimground</textarea>
+<script>
+document.getElementById('copybtn').addEventListener('click', async () => {
+  const btn = document.getElementById('copybtn');
+  const txt = document.getElementById('copytext').value;
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) {
+    const ta = document.getElementById('copytext');
+    ta.select(); document.execCommand('copy');
+  }
+  btn.textContent = 'copied';
+  setTimeout(() => { btn.textContent = 'copy page as text'; }, 1500);
+});
+</script>
+</body></html>

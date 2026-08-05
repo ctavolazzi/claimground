@@ -22,7 +22,11 @@ State schema (all lists append-only; latest record wins):
     edges     [{kind: need|attack, src, dst}]
               [{kind: ground, claim, source, locator, quote?}]
     sources   [{id, ref, url?, bears_on}]
-    grades    [{source, grade: LIVE|DEAD|SAYS_OTHERWISE, claim?, quote?}]
+    grades    [{source, grade: LIVE|DEAD|SAYS_OTHERWISE|WALLED, claim?,
+                quote?, date?, note?}]
+              WALLED: paywalled or robot-blocked. A refusal is not a dead
+              citation, and it is never laundered into support: WALLED
+              grounds nothing (only LIVE does) but stays on the record.
     holes     [{claim, why}]
     linchpin  [claim_id]          latest wins
     leaves    [claim_id]
@@ -45,7 +49,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 BANNED_DEFAULT = ["\u2014", "man" "ifesto"]  # escaped/split on purpose:
                                              # this source never contains
@@ -119,6 +123,14 @@ def latest_grade(state, sid):
         if rec["source"] == sid:
             g = rec["grade"]
     return g
+
+
+def latest_grade_rec(state, sid):
+    r = None
+    for rec in state["grades"]:
+        if rec["source"] == sid:
+            r = rec
+    return r or {}
 
 
 def floating(state):
@@ -368,7 +380,7 @@ def validate(state):
     for g in state["grades"]:
         if g.get("source") not in sids:
             bad.append("grade on unknown source %s" % g.get("source"))
-        if g.get("grade") not in ("LIVE", "DEAD", "SAYS_OTHERWISE"):
+        if g.get("grade") not in ("LIVE", "DEAD", "SAYS_OTHERWISE", "WALLED"):
             bad.append("grade %r invalid" % g.get("grade"))
         if g.get("grade") == "SAYS_OTHERWISE" and g.get("claim") not in nids:
             bad.append("SAYS_OTHERWISE must name a claim")
@@ -435,6 +447,11 @@ ul.tree li { margin:7px 0; }
 .badge.live { color:var(--ok); border-color:var(--ok); }
 .badge.dead { color:var(--muted); }
 .badge.so, .badge.hole { color:var(--bad); border-color:var(--bad); }
+.badge.walled { color:var(--mid); border-color:var(--mid); }
+.receipts { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
+  font:11.5px/1.7 var(--mono); color:var(--muted); }
+.receipts b { color:var(--ink); font-weight:600; }
+.gdate { font:11px var(--mono); color:var(--muted); display:block; }
 .badge.linch { color:var(--ok); border-color:var(--ok); font-weight:700; }
 .badge.attack { color:var(--mid); border-color:var(--mid); font-weight:700; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
@@ -478,17 +495,21 @@ def _esc(s):
     return html.escape(str(s), quote=True)
 
 
+_BADGE_CLS = {"LIVE": "live", "DEAD": "dead", "SAYS_OTHERWISE": "so",
+              "WALLED": "walled"}
+
+
 def _grade_badges(state, cid):
     out = []
     for e in ground_edges(state, cid):
         g = latest_grade(state, e["source"]) or "ungraded"
-        cls = {"LIVE": "live", "DEAD": "dead",
-               "SAYS_OTHERWISE": "so"}.get(g, "dead")
+        cls = _BADGE_CLS.get(g, "dead")
         out.append('<span class="badge %s">%s @ %s: %s</span>'
                    % (cls, _esc(e["source"]), _esc(e["locator"]), _esc(g)))
     for h in state["holes"]:
         if h["claim"] == cid:
-            out.append('<span class="badge hole">HOLE: %s</span>' % _esc(h["why"]))
+            why = h["why"] if len(h["why"]) <= 60 else h["why"][:57] + "..."
+            out.append('<span class="badge hole">HOLE: %s</span>' % _esc(why))
     src = _contradicted(state, cid)
     if src:
         out.append('<span class="badge so">%s says otherwise</span>' % _esc(src))
@@ -551,11 +572,34 @@ def render(state, out_path):
         cls = sp["label"].replace(" ", "-") if sp["label"] in ("objection", "linchpin") else ""
         paras = "".join("<p>%s</p>" % _esc(p)
                         for p in re.split(r"\n\s*\n", text) if p.strip())
+        # custody: every passage carries its receipts inline
+        rec_html, rec_txt = [], []
+        for cid in sp["claims"]:
+            for e in ground_edges(state, cid):
+                grec = latest_grade_rec(state, e["source"])
+                stampd = (" " + grec["date"]) if grec.get("date") else ""
+                rec_html.append("<b>%s</b> &larr; %s @ %s [%s%s]"
+                                % (_esc(cid), _esc(e["source"]),
+                                   _esc(e["locator"]),
+                                   _esc(grec.get("grade", "ungraded")), stampd))
+                rec_txt.append("  %s <- %s @ %s [%s%s]"
+                               % (cid, e["source"], e["locator"],
+                                  grec.get("grade", "ungraded"), stampd))
+            for h in state["holes"]:
+                if h["claim"] == cid:
+                    rec_html.append("<b>%s</b> &larr; HOLE: %s"
+                                    % (_esc(cid), _esc(h["why"])))
+                    rec_txt.append("  %s <- HOLE: %s" % (cid, h["why"]))
+        receipts = ('<div class="receipts">%s</div>' % "<br>".join(rec_html)
+                    if rec_html else "")
         passages_html.append(
-            '<article class="passage %s"><h3>%s · %s · %s</h3>%s</article>'
-            % (cls, _esc(sp["id"]), _esc(sp["label"]), status, paras))
+            '<article class="passage %s"><h3>%s · %s · %s</h3>%s%s</article>'
+            % (cls, _esc(sp["id"]), _esc(sp["label"]), status, paras, receipts))
         passages_txt += ["[%s · %s · %s]" % (sp["id"], sp["label"], status),
-                         text, ""]
+                         text]
+        if rec_txt:
+            passages_txt += ["receipts:"] + rec_txt
+        passages_txt.append("")
     if not passages_html:
         note = "No prose. The run ended in phase 1, before composition."
         passages_html = ["<p>%s</p>" % note]
@@ -599,14 +643,22 @@ def render(state, out_path):
                 atts_txt.append("%s @ %s%s"
                                 % (e["claim"], e["locator"],
                                    (' :: "%s"' % e["quote"]) if e.get("quote") else ""))
-        cls = {"LIVE": "live", "DEAD": "dead",
-               "SAYS_OTHERWISE": "so"}.get(g, "dead")
+        cls = _BADGE_CLS.get(g, "dead")
+        grec = latest_grade_rec(state, s["id"])
+        gcell = "<span class='badge %s'>%s</span>" % (cls, _esc(g))
+        if grec.get("date"):
+            gcell += "<span class='gdate'>graded %s</span>" % _esc(grec["date"])
+        if grec.get("note"):
+            gcell += "<span class='gdate'>%s</span>" % _esc(grec["note"])
         src_rows.append("<tr><td class='mono'>%s</td><td>%s</td>"
-                        "<td><span class='badge %s'>%s</span></td><td>%s</td></tr>"
-                        % (_esc(s["id"]), ref, cls, _esc(g),
+                        "<td>%s</td><td>%s</td></tr>"
+                        % (_esc(s["id"]), ref, gcell,
                            "<br>".join(atts_html) or "not attached"))
+        gtxt = g + ((", graded " + grec["date"]) if grec.get("date") else "")
+        if grec.get("note"):
+            gtxt += "; " + grec["note"]
         src_txt.append("%s. %s [%s]%s" % (s["id"], s["ref"] +
-                       ((" <" + s["url"] + ">") if s.get("url") else ""), g,
+                       ((" <" + s["url"] + ">") if s.get("url") else ""), gtxt,
                        ("\n    " + "\n    ".join(atts_txt)) if atts_txt else ""))
 
     # --- dead-claim ledger ---

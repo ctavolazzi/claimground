@@ -1,0 +1,8 @@
+# Third-party PUBLIC tokens inside archived source pages (chain-of-custody
+# cache artifacts): Shopify storefront token + buyer-flags JWT on farm.bot,
+# CleanTalk key + reCAPTCHA sitekey on paperpot.co. Public by design, not
+# our secrets. Preserved because the cache must match what was read.
+examples/johnny-autoseed-cost/cache/s1-farmbot-genesis-xl-v18.html:generic-api-key:10899
+examples/johnny-autoseed-cost/cache/s1-farmbot-genesis-xl-v18.html:jwt:1412
+examples/johnny-autoseed-cost/cache/s4-paperpot-jp5.html:generic-api-key:1177
+examples/johnny-autoseed-cost/cache/s4-paperpot-jp5.html:generic-api-key:28

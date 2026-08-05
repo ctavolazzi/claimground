@@ -1,0 +1,399 @@
+{
+  "meta": {
+    "slug": "johnny-autoseed-cost",
+    "date": "2026-08-04",
+    "title": "Autonomous seeding robot vs hired labor, quarter-acre scale"
+  },
+  "constraints": {
+    "voice": "plain declarative, grant-evidence register"
+  },
+  "nodes": [
+    {
+      "id": "c1",
+      "text": "An autonomous seeding robot plants a quarter-acre plot at lower cost per bed than hired labor within one season"
+    },
+    {
+      "id": "c2",
+      "text": "A garden-bed-scale autonomous seeding robot can be bought today for about $8,000"
+    },
+    {
+      "id": "c3",
+      "text": "The largest garden-scale autonomous seeder covers at most 3 by 6 meters, 18 square meters"
+    },
+    {
+      "id": "c4",
+      "text": "Hired crop labor costs about $17 per hour at the US median"
+    },
+    {
+      "id": "c5",
+      "text": "A walk-behind push seeder lets one worker seed a full 30-inch bed in one or two walking passes"
+    },
+    {
+      "id": "c6",
+      "text": "Amortized over one season, the robot's cost per bed planted is lower than the hired-labor cost per bed"
+    },
+    {
+      "id": "a1",
+      "text": "A quarter acre is far too small to amortize any autonomous seeder's capital cost within one season"
+    },
+    {
+      "id": "a2",
+      "text": "Garden-scale automation costs thousands of dollars while covering only a few beds"
+    },
+    {
+      "id": "a3",
+      "text": "Field-scale seeding robots cost tens of thousands of dollars and are designed for fields of 20 to 30 hectares"
+    }
+  ],
+  "edges": [
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c2"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c3"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c4"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c5"
+    },
+    {
+      "kind": "need",
+      "src": "c1",
+      "dst": "c6"
+    },
+    {
+      "kind": "attack",
+      "src": "c1",
+      "dst": "a1"
+    },
+    {
+      "kind": "need",
+      "src": "a1",
+      "dst": "a2"
+    },
+    {
+      "kind": "need",
+      "src": "a1",
+      "dst": "a3"
+    },
+    {
+      "kind": "ground",
+      "claim": "c2",
+      "source": "s1",
+      "locator": "product pricing section near top of page",
+      "quote": "$7,995.00"
+    },
+    {
+      "kind": "ground",
+      "claim": "c3",
+      "source": "s1",
+      "locator": "Nominal machine dimensions section",
+      "quote": "Width: Up to 1.5m (Genesis) or 3m (Genesis XL); Length: Up to 3m (Genesis) or 6m (Genesis XL)"
+    },
+    {
+      "kind": "ground",
+      "claim": "c4",
+      "source": "s3",
+      "locator": "Wages & Employment Trends section, 2025 BLS wage data",
+      "quote": "$17.15 hourly, $35,660 annual"
+    },
+    {
+      "kind": "ground",
+      "claim": "c5",
+      "source": "s4",
+      "locator": "Description section under main product heading",
+      "quote": "With the JP5 you can quickly plant up to 10 rows with just two passes on a 30″ bed."
+    },
+    {
+      "kind": "ground",
+      "claim": "a2",
+      "source": "s1",
+      "locator": "product pricing section + Nominal machine dimensions section",
+      "quote": "$7,995.00 ... Width: Up to 3m (Genesis XL); Length: Up to 6m (Genesis XL)"
+    },
+    {
+      "kind": "ground",
+      "claim": "a3",
+      "source": "s5",
+      "locator": "Scaleable with more robots feature section",
+      "quote": "We suggest the FD20 for fields between 20 and 30 hectares, depending on the crops grown"
+    },
+    {
+      "kind": "ground",
+      "claim": "a3",
+      "source": "s6",
+      "locator": "[PRICE] ALERT section and main product header",
+      "quote": "$60,000"
+    }
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "ref": "FarmBot Genesis XL v1.8 product page",
+      "url": "https://farm.bot/products/farmbot-genesis-xl-v1-8",
+      "bears_on": "garden robot price growing area dimensions"
+    },
+    {
+      "id": "s2",
+      "ref": "BLS OES 45-2092 Farmworkers and Laborers, Crop (current)",
+      "url": "https://www.bls.gov/oes/current/oes452092.htm",
+      "bears_on": "farm labor hourly wage official"
+    },
+    {
+      "id": "s3",
+      "ref": "O*NET OnLine 45-2092.00 summary (republishes BLS wage data)",
+      "url": "https://www.onetonline.org/link/summary/45-2092.00",
+      "bears_on": "farm labor hourly wage median"
+    },
+    {
+      "id": "s4",
+      "ref": "Paperpot Co, Jang JP5 seeder product page",
+      "url": "https://paperpot.co/product/jang-jp5-seeder/",
+      "bears_on": "push seeder rows passes bed seeding speed"
+    },
+    {
+      "id": "s5",
+      "ref": "FarmDroid FD20 product page",
+      "url": "https://farmdroid.com/products/farmdroid-fd20/",
+      "bears_on": "field seeding robot hectares capacity design target"
+    },
+    {
+      "id": "s6",
+      "ref": "Robotomated FD20 review page",
+      "url": "https://robotomated.com/explore/agricultural/farmdroid-fd20",
+      "bears_on": "field seeding robot price coverage"
+    }
+  ],
+  "grades": [
+    {
+      "source": "s1",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s2",
+      "grade": "WALLED",
+      "date": "2026-08-04",
+      "note": "HTTP 403 via WebFetch and via curl with browser UA; refusal, not a dead citation; 403 page archived in cache"
+    },
+    {
+      "source": "s3",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s4",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s5",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    },
+    {
+      "source": "s6",
+      "grade": "LIVE",
+      "date": "2026-08-04"
+    }
+  ],
+  "holes": [
+    {
+      "claim": "c6",
+      "why": "No source supports the comparison, and the grounded numbers imply its opposite by roughly two orders of magnitude. The only garden-bed-scale robot on the market costs $7,995 (s1, pricing section) and covers 18 square meters, about 4 standard 30-inch beds (s1, dimensions section), so one-season amortization is roughly $2,000 per bed before installation and upkeep. Hired labor at the $17.15/hr US median (s3) costs under $20 per bed even at a deliberately generous full hour per bed, and a push seeder finishes a bed in one or two walking passes (s4), so the real figure is lower. Field-scale robots amortize worse here: $60,000 (s6) against a 20-to-30-hectare design target (s5) is 80 to 120 times the plot in question."
+    }
+  ],
+  "linchpin": [
+    "c6"
+  ],
+  "leaves": [
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6",
+    "a2",
+    "a3"
+  ],
+  "specs": [],
+  "bindings": [],
+  "prose": [],
+  "done": [],
+  "trail": [
+    {
+      "event": "intake",
+      "claim": "c1",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "source",
+      "source": "s1",
+      "ref": "farm.bot Genesis XL v1.8"
+    },
+    {
+      "event": "source",
+      "source": "s2",
+      "ref": "BLS OES 45-2092"
+    },
+    {
+      "event": "source",
+      "source": "s3",
+      "ref": "O*NET 45-2092.00"
+    },
+    {
+      "event": "source",
+      "source": "s4",
+      "ref": "Paperpot Jang JP5"
+    },
+    {
+      "event": "source",
+      "source": "s5",
+      "ref": "FarmDroid FD20"
+    },
+    {
+      "event": "source",
+      "source": "s6",
+      "ref": "Robotomated FD20"
+    },
+    {
+      "event": "need",
+      "parent": "c1",
+      "claim": "c2"
+    },
+    {
+      "event": "need",
+      "parent": "c1",
+      "claim": "c3"
+    },
+    {
+      "event": "need",
+      "parent": "c1",
+      "claim": "c4"
+    },
+    {
+      "event": "need",
+      "parent": "c1",
+      "claim": "c5"
+    },
+    {
+      "event": "need",
+      "parent": "c1",
+      "claim": "c6"
+    },
+    {
+      "event": "attack",
+      "parent": "c1",
+      "claim": "a1"
+    },
+    {
+      "event": "need",
+      "parent": "a1",
+      "claim": "a2"
+    },
+    {
+      "event": "need",
+      "parent": "a1",
+      "claim": "a3"
+    },
+    {
+      "event": "linchpin",
+      "claim": "c6"
+    },
+    {
+      "event": "grade",
+      "source": "s2",
+      "grade": "WALLED",
+      "date": "2026-08-04",
+      "note": "BLS blocked; wage grounded via s3 instead; never laundered into support"
+    },
+    {
+      "event": "attach",
+      "claim": "c2",
+      "source": "s1",
+      "locator": "pricing section",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "attach",
+      "claim": "c3",
+      "source": "s1",
+      "locator": "dimensions section",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "work_across",
+      "source": "s1",
+      "touched": "a2",
+      "relation": "support",
+      "note": "ACH rule: the vendor's own price and coverage testify FOR the attack; snippet had claimed $4,395 (v1.7); fetched artifact says $7,995 (v1.8), snippet-vs-artifact lesson confirmed"
+    },
+    {
+      "event": "attach",
+      "claim": "c4",
+      "source": "s3",
+      "locator": "Wages & Employment Trends",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "work_across",
+      "source": "s3",
+      "touched": "a1",
+      "relation": "support",
+      "note": "the LOW median wage is what makes one-season amortization impossible; wage evidence cuts against the root it was fetched to support"
+    },
+    {
+      "event": "attach",
+      "claim": "c5",
+      "source": "s4",
+      "locator": "Description section",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "work_across",
+      "source": "s4",
+      "touched": "a1",
+      "relation": "support",
+      "note": "fast manual seeding lowers the labor baseline the robot must beat"
+    },
+    {
+      "event": "attach",
+      "claim": "a3",
+      "source": "s5",
+      "locator": "Scaleable section",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "attach",
+      "claim": "a3",
+      "source": "s6",
+      "locator": "[PRICE] ALERT section",
+      "date": "2026-08-04"
+    },
+    {
+      "event": "hole",
+      "claim": "c6",
+      "date": "2026-08-04",
+      "why": "no source supports the comparison; grounded numbers imply roughly 100x the other way"
+    },
+    {
+      "event": "note",
+      "text": "judgment count: 2-4 pointed judgments per leaf (does page state it / where / grade / who else does it touch); c5 cost 5 fetches across 4 candidate sources before a groundable sentence appeared"
+    },
+    {
+      "event": "verdict",
+      "verdict": "REFUTED",
+      "claim": "c6",
+      "cause": "ungroundable"
+    }
+  ]
+}
